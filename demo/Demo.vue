@@ -16,11 +16,11 @@ export default {
         return {
             settings: {
                 urls: {
-                    loadData: 'src/data/explorer-load-data.json',
-                    loadItemData: 'src/data/media-load-data.php',
-                    addItem: 'src/data/explorer-add-item.php',
-                    removeItem: 'src/data/explorer-remove-item.php',
-                    renameItem: 'src/data/explorer-rename-item.php'
+                    loadData: 'data/load-data.json',
+                    loadItemData: 'data/load-item-data.php',
+                    addItem: 'data/add-item.php',
+                    removeItem: 'data/remove-item.php',
+                    renameItem: 'data/rename-item.php'
                 }
             }
         }

@@ -9,7 +9,7 @@
                     <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input" />
                 </div>
 
-                <m3-button color="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showDropdown"></m3-button>
+                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showDropdown" flat></m3-button>
 
                 <m3-dropdown v-if="actionsAllowed" ref="dropdown">
                     <ul>

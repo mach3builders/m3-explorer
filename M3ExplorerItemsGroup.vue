@@ -2,7 +2,7 @@
     <div class="m3-explorer-items-group">
         <div class="m3-explorer-items-group-name-wrapper">
             <div class="m3-explorer-items-group-name">{{ data.name }}</div>
-            <m3-button icon="folder-plus" @click.native.stop="showDropdown" v-if="!data.static"></m3-button>
+            <m3-button icon="folder-plus" @click.native.stop="showDropdown" v-if="!data.static" flat></m3-button>
 
             <m3-dropdown v-if="!data.static" ref="add-dropdown">
                 <div class="m3-form-inline">

@@ -1,25 +1,3 @@
-.m3-explorer {
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    user-select: none;
-    width: 15rem;
-}
-
-.m3-explorer-header {
-    background-color: $color-white;
-    border-bottom: 1px solid $color-gray-200;
-    flex-shrink: 0;
-    height: 3rem;
-}
-
-.m3-explorer-body {
-    flex-grow: 1;
-    overflow: auto;
-    padding: 1.5rem 0.75rem;
-    position: relative; /* do not remove, it's needed for dropdown positioning */
-}
-
 //**************
 // items group *
 //**************
@@ -160,6 +138,9 @@
 .m3-explorer-item-name,
 .m3-explorer-item-input {
     flex-grow: 1;
+    font-family: $font-family-regular;
+    font-size: 0.75rem;
+    line-height: 2;
     overflow: hidden;
     padding: 0.5rem;
     padding-left: 0;
