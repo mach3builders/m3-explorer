@@ -1,0 +1,24 @@
+[
+    { "id": 1, "name": "My Uploads", "items": {
+        "static" : [
+            { "id": 1, "icon": "home", "name": "Home", "active": true},
+            { "id": 2, "icon": "recycle", "name": "Used" }
+        ], "dynamic": [
+            { "id": 1, "name": "Wedding" },
+            { "id": 2, "name": "Business" }
+        ]}
+    },
+
+    { "id": 2, "name": "Library", "static": true, "items": [
+        { "id": 1, "name": "Images" },
+        { "id": 2, "name": "Icons", "items": [
+            { "id": 1, "name": "Iconmonstr" },
+            { "id": 2, "name": "Fontawesome", "items": [
+                { "id": 1, "name": "Solid" },
+                { "id": 2, "name": "Regular" },
+                { "id": 3, "name": "Light" },
+                { "id": 4, "name": "Brands" }
+            ]}
+        ]}
+    ]}
+]
