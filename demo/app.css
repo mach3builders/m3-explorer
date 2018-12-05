@@ -141,21 +141,6 @@
   width: 2.25rem;
 }
 
-.m3-button > .m3-icon {
-  opacity: 0.6;
-  -webkit-transition: opacity 200ms;
-  transition: opacity 200ms;
-}
-
-.m3-button > .m3-icon:not(:last-child) {
-  -webkit-transform: translateX(-0.5rem);
-          transform: translateX(-0.5rem);
-}
-
-.m3-button:hover > .m3-icon {
-  opacity: 1;
-}
-
 .m3-collapse {
   overflow: hidden;
 }
