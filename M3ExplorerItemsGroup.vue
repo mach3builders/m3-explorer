@@ -85,7 +85,7 @@ export default {
     },
 
     methods: {
-        sortItems: function(data) {
+        sortItems(data) {
             if (data.length) {
                 data.sort(function(a, b) {
                     const nameA = a.name.toUpperCase()
@@ -110,7 +110,7 @@ export default {
             if (this.dynamicItems.length) this.sortItems(this.dynamicItems)
         },
 
-        showPopper: function(vm, event) {
+        showPopper(vm, event) {
             event.stopPropagation()
             const popperRef = this.$refs['add-popper']
 

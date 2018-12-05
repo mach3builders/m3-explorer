@@ -9,11 +9,11 @@
                     <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input">
                 </div>
 
-                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @button:clicked="showActionsPopper" flat></m3-button>
+                <m3-button type="transparent" icon="ellipsis-h" ref="actions-button" v-if="actionsAllowed" @button:clicked="showActionsPopper" flat></m3-button>
 
-                <m3-popper v-if="actionsAllowed" ref="actions-popper">
+                <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
                     <ul>
-                        <li @click="add"><div>Add folder</div></li>
+                        <li @click="showAddPopper"><div>Add folder</div></li>
                         <li @click="rename"><div>Rename</div></li>
                         <li @click="removeConfirm">
                             <div>Delete</div>
@@ -27,11 +27,11 @@
                     </ul>
                 </m3-popper>
 
-                <m3-popper v-if="!data.static" ref="add-popper">
+                <m3-popper v-if="!data.static" ref="add-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
                     <div class="m3-form-inline">
                         <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="add" /></div>
                         <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
-                        <m3-button type="danger" icon="times" @button:clicked="hideActionsPopper" flat></m3-button>
+                        <m3-button type="danger" icon="times" @button:clicked="hideAddPopper" flat></m3-button>
                     </div>
                 </m3-popper>
             </div>
@@ -154,6 +154,14 @@ export default {
             this.itemsOpen = !this.itemsOpen
         },
 
+        blurItem() {
+            this.focus = false
+        },
+
+        focusItem() {
+            this.focus = true
+        },
+
         click() {
             if (this.data.active) return
 
@@ -180,7 +188,7 @@ export default {
         },
 
         add() {
-            console.log(this)
+
         },
 
         rename() {
@@ -257,16 +265,12 @@ export default {
             this.hideActionsPopper()
         },
 
-        showActionsPopper: function(vm, event) {
+        showActionsPopper(vm, event) {
             event.stopPropagation()
             this.removeCancelled(vm, event)
-            this.focus = true
 
             const ref = this.$refs['actions-popper']
             ref.setDispatcher(vm)
-            ref.setHideCallback(() => {
-                this.focus = false
-            })
             ref.show()
 
             this.$root.eventHub.$emit('hide-renaming-item-popper')
@@ -276,15 +280,16 @@ export default {
             this.$refs['actions-popper'].hide()
         },
 
-        showAddPopper: function(vm, event) {
-            const ref = this.$refs['add-popper']
-            ref.setDispatcher(vm)
-            ref.setHideCallback(() => {
-                this.focus = false
-            })
-            ref.show()
+        showAddPopper() {
+            this.focus = true
+            const dispatcherRef = this.$refs['actions-button']
+            const popperRef = this.$refs['add-popper']
+            popperRef.setDispatcher(dispatcherRef)
+            popperRef.show()
+        },
 
-            this.hideActionsPopper()
+        hideAddPopper() {
+            this.$refs['add-popper'].hide()
         }
     }
 }

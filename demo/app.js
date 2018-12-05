@@ -3282,32 +3282,39 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.hideCallback = callback;
     },
     show: function show() {
-      if (this.dispatcher) {
-        // calculate variables
-        var dispatcherElement = this.dispatcher.$el;
-        var position = this.position(dispatcherElement);
-        var height = parseInt(dispatcherElement.offsetHeight);
-        var width = parseInt(dispatcherElement.offsetWidth); // set position
+      if (!this.active) {
+        // make sure all other dropdowns are hidden, except this one
+        this.$root.eventHub.$emit('document:clicked', this);
 
-        this.$el.style.top = position.y + height + 'px';
-        this.$el.style.left = position.x + width / 2 + 'px';
-      } // make sure all other dropdowns are hidden, except this one
+        if (this.dispatcher) {
+          // calculate variables
+          var dispatcherElement = this.dispatcher.$el;
+          var position = this.position(dispatcherElement);
+          var height = parseInt(dispatcherElement.offsetHeight);
+          var width = parseInt(dispatcherElement.offsetWidth); // set position
 
+          this.$el.style.top = position.y + height + 'px';
+          this.$el.style.left = position.x + width / 2 + 'px';
+        }
 
-      this.$root.eventHub.$emit('document:clicked', this);
-      this.active = true;
+        this.active = true; // emit event, so the parent can act on it
+
+        this.$emit('popper:shown', this);
+      }
     },
     hide: function hide(vm) {
       var _this = this;
 
-      if (vm !== this) {
+      if (vm !== this && this.active) {
         this.active = false; // execute an extra callback when exist
-
-        if (this.hideCallback) this.hideCallback(); // fix for never see flickering
+        // if (this.hideCallback) this.hideCallback()
+        // fix for never see flickering
 
         setTimeout(function () {
           _this.$el.removeAttribute('style');
-        }, 0);
+        }, 0); // emit event, so the parent can act on it
+
+        this.$emit('popper:hidden', this);
       }
     },
     position: function position(el) {
@@ -3533,6 +3540,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     toggleItems: function toggleItems() {
       this.itemsOpen = !this.itemsOpen;
     },
+    blurItem: function blurItem() {
+      this.focus = false;
+    },
+    focusItem: function focusItem() {
+      this.focus = true;
+    },
     click: function click() {
       var _this = this;
 
@@ -3558,9 +3571,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         });
       }
     },
-    add: function add() {
-      console.log(this);
-    },
+    add: function add() {},
     rename: function rename() {
       var _this2 = this;
 
@@ -3629,32 +3640,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.hideActionsPopper();
     },
     showActionsPopper: function showActionsPopper(vm, event) {
-      var _this5 = this;
-
       event.stopPropagation();
       this.removeCancelled(vm, event);
-      this.focus = true;
       var ref = this.$refs['actions-popper'];
       ref.setDispatcher(vm);
-      ref.setHideCallback(function () {
-        _this5.focus = false;
-      });
       ref.show();
       this.$root.eventHub.$emit('hide-renaming-item-popper');
     },
     hideActionsPopper: function hideActionsPopper() {
       this.$refs['actions-popper'].hide();
     },
-    showAddPopper: function showAddPopper(vm, event) {
-      var _this6 = this;
-
-      var ref = this.$refs['add-popper'];
-      ref.setDispatcher(vm);
-      ref.setHideCallback(function () {
-        _this6.focus = false;
-      });
-      ref.show();
-      this.hideActionsPopper();
+    showAddPopper: function showAddPopper() {
+      this.focus = true;
+      var dispatcherRef = this.$refs['actions-button'];
+      var popperRef = this.$refs['add-popper'];
+      popperRef.setDispatcher(dispatcherRef);
+      popperRef.show();
+    },
+    hideAddPopper: function hideAddPopper() {
+      this.$refs['add-popper'].hide();
     }
   }
 });
@@ -3891,6 +3895,7 @@ var render = function() {
               _vm._v(" "),
               _vm.actionsAllowed
                 ? _c("m3-button", {
+                    ref: "actions-button",
                     attrs: {
                       type: "transparent",
                       icon: "ellipsis-h",
@@ -3901,92 +3906,114 @@ var render = function() {
                 : _vm._e(),
               _vm._v(" "),
               _vm.actionsAllowed
-                ? _c("m3-popper", { ref: "actions-popper" }, [
-                    _c("ul", [
-                      _c("li", { on: { click: _vm.add } }, [
-                        _c("div", [_vm._v("Add folder")])
-                      ]),
-                      _vm._v(" "),
-                      _c("li", { on: { click: _vm.rename } }, [
-                        _c("div", [_vm._v("Rename")])
-                      ]),
-                      _vm._v(" "),
-                      _c("li", { on: { click: _vm.removeConfirm } }, [
-                        _c("div", [_vm._v("Delete")]),
+                ? _c(
+                    "m3-popper",
+                    {
+                      ref: "actions-popper",
+                      on: {
+                        "popper:shown": _vm.focusItem,
+                        "popper:hidden": _vm.blurItem
+                      }
+                    },
+                    [
+                      _c("ul", [
+                        _c("li", { on: { click: _vm.showAddPopper } }, [
+                          _c("div", [_vm._v("Add folder")])
+                        ]),
                         _vm._v(" "),
-                        _c(
-                          "div",
-                          {
-                            staticClass: "m3-explorer-item-remove-confirm",
-                            class: { "m3-show": _vm.removeConfirmClass }
-                          },
-                          [
-                            _c(
-                              "m3-buttons",
-                              [
-                                _c("m3-button", {
-                                  attrs: { type: "danger", icon: "times" },
-                                  on: { "button:clicked": _vm.removeCancelled }
-                                }),
-                                _vm._v(" "),
-                                _c("m3-button", {
-                                  attrs: { type: "success", icon: "check" },
-                                  on: { "button:clicked": _vm.remove }
-                                })
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
+                        _c("li", { on: { click: _vm.rename } }, [
+                          _c("div", [_vm._v("Rename")])
+                        ]),
+                        _vm._v(" "),
+                        _c("li", { on: { click: _vm.removeConfirm } }, [
+                          _c("div", [_vm._v("Delete")]),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              staticClass: "m3-explorer-item-remove-confirm",
+                              class: { "m3-show": _vm.removeConfirmClass }
+                            },
+                            [
+                              _c(
+                                "m3-buttons",
+                                [
+                                  _c("m3-button", {
+                                    attrs: { type: "danger", icon: "times" },
+                                    on: {
+                                      "button:clicked": _vm.removeCancelled
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("m3-button", {
+                                    attrs: { type: "success", icon: "check" },
+                                    on: { "button:clicked": _vm.remove }
+                                  })
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ])
                       ])
-                    ])
-                  ])
+                    ]
+                  )
                 : _vm._e(),
               _vm._v(" "),
               !_vm.data.static
-                ? _c("m3-popper", { ref: "add-popper" }, [
-                    _c(
-                      "div",
-                      { staticClass: "m3-form-inline" },
-                      [
-                        _c("div", { staticClass: "m3-form-field" }, [
-                          _c("input", {
-                            ref: "add-input",
-                            attrs: { maxlength: "50" },
-                            on: {
-                              keyup: function($event) {
-                                if (
-                                  !("button" in $event) &&
-                                  _vm._k(
-                                    $event.keyCode,
-                                    "enter",
-                                    13,
-                                    $event.key,
-                                    "Enter"
-                                  )
-                                ) {
-                                  return null
+                ? _c(
+                    "m3-popper",
+                    {
+                      ref: "add-popper",
+                      on: {
+                        "popper:shown": _vm.focusItem,
+                        "popper:hidden": _vm.blurItem
+                      }
+                    },
+                    [
+                      _c(
+                        "div",
+                        { staticClass: "m3-form-inline" },
+                        [
+                          _c("div", { staticClass: "m3-form-field" }, [
+                            _c("input", {
+                              ref: "add-input",
+                              attrs: { maxlength: "50" },
+                              on: {
+                                keyup: function($event) {
+                                  if (
+                                    !("button" in $event) &&
+                                    _vm._k(
+                                      $event.keyCode,
+                                      "enter",
+                                      13,
+                                      $event.key,
+                                      "Enter"
+                                    )
+                                  ) {
+                                    return null
+                                  }
+                                  return _vm.add($event)
                                 }
-                                return _vm.add($event)
                               }
-                            }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("m3-button", {
+                            attrs: { type: "success", icon: "check", flat: "" },
+                            on: { "button:clicked": _vm.add }
+                          }),
+                          _vm._v(" "),
+                          _c("m3-button", {
+                            attrs: { type: "danger", icon: "times", flat: "" },
+                            on: { "button:clicked": _vm.hideAddPopper }
                           })
-                        ]),
-                        _vm._v(" "),
-                        _c("m3-button", {
-                          attrs: { type: "success", icon: "check", flat: "" },
-                          on: { "button:clicked": _vm.add }
-                        }),
-                        _vm._v(" "),
-                        _c("m3-button", {
-                          attrs: { type: "danger", icon: "times", flat: "" },
-                          on: { "button:clicked": _vm.hideActionsPopper }
-                        })
-                      ],
-                      1
-                    )
-                  ])
+                        ],
+                        1
+                      )
+                    ]
+                  )
                 : _vm._e()
             ],
             1

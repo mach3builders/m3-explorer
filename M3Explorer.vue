@@ -104,14 +104,14 @@ export default {
             }
         },
 
-        setActiveItem: function(item) {
+        setActiveItem(item) {
             if (this.activeItem) {
                 this.$set(this.activeItem, 'active', false)
             }
             this.activeItem = item
         },
 
-        setRenamingItem: function(item) {
+        setRenamingItem(item) {
             this.renamingItem = item
         },
 
