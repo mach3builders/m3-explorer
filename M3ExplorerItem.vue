@@ -9,9 +9,9 @@
                     <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input" />
                 </div>
 
-                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showDropdown" flat></m3-button>
+                <m3-button color="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showPopper"></m3-button>
 
-                <m3-dropdown v-if="actionsAllowed" ref="dropdown">
+                <m3-popper v-if="actionsAllowed" ref="popper">
                     <ul>
                         <li @click="rename"><div>Rename</div></li>
                         <li @click="removeConfirm">
@@ -24,7 +24,7 @@
                             </div>
                         </li>
                     </ul>
-                </m3-dropdown>
+                </m3-popper>
             </div>
         </div>
 
@@ -55,14 +55,14 @@ import axios from 'axios'
 import M3Button from '@mach3builders/m3-components/M3Button'
 import M3Buttons from '@mach3builders/m3-components/M3Buttons'
 import M3Collapse from '@mach3builders/m3-components/M3Collapse'
-import M3Dropdown from '@mach3builders/m3-components/M3Dropdown'
+import M3Popper from '@mach3builders/m3-components/M3Popper'
 
 export default {
     components: {
         M3Button,
         M3Buttons,
-        M3Dropdown,
         M3Collapse,
+        M3Popper,
     },
 
     props: {
@@ -182,7 +182,7 @@ export default {
                 }
             })
 
-            this.hideDropdown()
+            this.hidePopper()
         },
 
         renamed() {
@@ -238,25 +238,25 @@ export default {
                 })
             }
 
-            this.hideDropdown()
+            this.hidePopper()
         },
 
-        showDropdown: function(event) {
+        showPopper: function(event) {
             this.removeCancelled()
             this.focus = true
 
-            const ref = this.$refs['dropdown']
+            const ref = this.$refs['popper']
             ref.setDispatcher(event.currentTarget)
             ref.setHideCallback(() => {
                 this.focus = false
             })
             ref.show()
 
-            this.$root.eventHub.$emit('hide-renaming-item-dropdown')
+            this.$root.eventHub.$emit('hide-renaming-item-popper')
         },
 
-        hideDropdown() {
-            this.$refs['dropdown'].hide()
+        hidePopper() {
+            this.$refs['popper'].hide()
         }
     }
 }

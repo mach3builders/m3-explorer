@@ -37,7 +37,7 @@ export default {
         // listen to events
         this.$root.eventHub.$on('set-active-item', this.setActiveItem)
         this.$root.eventHub.$on('set-renaming-item', this.setRenamingItem)
-        this.$root.eventHub.$on('hide-renaming-item-dropdown', this.hideRenamingItemDropdown)
+        this.$root.eventHub.$on('hide-renaming-item-popper', this.hideRenamingItemPopper)
 
         // load data
         if (this.urls.loadData) {
@@ -58,7 +58,7 @@ export default {
     beforeDestroy() {
         this.$root.eventHub.$off('set-active-item', this.setActiveItem)
         this.$root.eventHub.$off('set-renaming-item', this.setRenamingItem)
-        this.$root.eventHub.$off('hide-renaming-item-dropdown', this.hideRenamingItemDropdown)
+        this.$root.eventHub.$off('hide-renaming-item-popper', this.hideRenamingItemPopper)
     },
 
     methods: {
@@ -116,7 +116,7 @@ export default {
             this.renamingItem = item
         },
 
-        hideRenamingItemDropdown() {
+        hideRenamingItemPopper() {
             if (this.renamingItem) {
                 this.renamingItem.renaming = false
             }

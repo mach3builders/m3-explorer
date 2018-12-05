@@ -2,15 +2,15 @@
     <div class="m3-explorer-items-group">
         <div class="m3-explorer-items-group-name-wrapper">
             <div class="m3-explorer-items-group-name">{{ data.name }}</div>
-            <m3-button icon="folder-plus" @click.native.stop="showDropdown" v-if="!data.static" flat></m3-button>
+            <m3-button icon="folder-plus" @click.native.stop="showPopper" v-if="!data.static" flat></m3-button>
 
-            <m3-dropdown v-if="!data.static" ref="add-dropdown">
+            <m3-popper v-if="!data.static" ref="add-popper">
                 <div class="m3-form-inline">
                     <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="addItem" /></div>
                     <m3-button color="success" icon="check" @click.native="addItem"></m3-button>
-                    <m3-button color="danger" icon="times" @click.native="hideDropdown"></m3-button>
+                    <m3-button color="danger" icon="times" @click.native="hidePopper"></m3-button>
                 </div>
-            </m3-dropdown>
+            </m3-popper>
         </div>
 
         <div class="m3-explorer-items-wrapper" v-if="staticItems.length || dynamicItems.length">
@@ -42,13 +42,13 @@
 <script>
 import axios from 'axios'
 import M3Button from '@mach3builders/m3-components/M3Button'
-import M3Dropdown from '@mach3builders/m3-components/M3Dropdown'
+import M3Popper from '@mach3builders/m3-components/M3Popper'
 import M3ExplorerItem from './M3ExplorerItem'
 
 export default {
     components: {
         M3Button,
-        M3Dropdown,
+        M3Popper,
         M3ExplorerItem,
     },
 
@@ -106,12 +106,12 @@ export default {
             if (this.dynamicItems.length) this.sortItems(this.dynamicItems)
         },
 
-        showDropdown: function(event) {
-            const dropdownRef = this.$refs['add-dropdown']
+        showPopper: function(event) {
+            const popperRef = this.$refs['add-popper']
 
-            if (dropdownRef) {
-                dropdownRef.setDispatcher(event.currentTarget)
-                dropdownRef.show()
+            if (popperRef) {
+                popperRef.setDispatcher(event.currentTarget)
+                popperRef.show()
 
                 // focus on the input field, but first wait till the dom is updated
                 this.$nextTick(() => {
@@ -123,12 +123,12 @@ export default {
             }
         },
 
-        hideDropdown() {
-            const dropdownRef = this.$refs['add-dropdown']
+        hidePopper() {
+            const popperRef = this.$refs['add-popper']
             const inputRef = this.$refs['add-input']
 
-            if (dropdownRef && inputRef) {
-                dropdownRef.hide()
+            if (popperRef && inputRef) {
+                popperRef.hide()
                 inputRef.value = ''
             }
         },
@@ -148,7 +148,7 @@ export default {
                 // make request
                 axios.post(this.urls.addItem, formData)
                 .then((response) => {
-                    this.hideDropdown()
+                    this.hidePopper()
 
                     if (this.data.items.dynamic) {
                         this.data.items.dynamic.push(response.data.data)
