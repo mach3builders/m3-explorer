@@ -3,13 +3,13 @@
         <div class="m3-explorer-item">
             <i class="m3-explorer-item-expand far" :class="expandClasses" v-if="hasItems()" @click="toggleItems"></i>
             <div class="m3-explorer-item-name-wrapper" :class="itemClasses" @click="click">
-                <i class="m3-explorer-item-icon far" :class="iconClasses"></i>
+                <m3-icon :name="icon" size="large"></m3-icon>
                 <div class="m3-explorer-item-name" v-if="!renaming">{{ data.name }}</div>
                 <div class="m3-explorer-item-input" v-if="renaming" @click.stop>
                     <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input" />
                 </div>
 
-                <m3-button color="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showPopper"></m3-button>
+                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showPopper" flat></m3-button>
 
                 <m3-popper v-if="actionsAllowed" ref="popper">
                     <ul>
@@ -18,8 +18,8 @@
                             <div>Delete</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
-                                    <m3-button color="danger" icon="times" @click.native.stop="removeCancelled"></m3-button>
-                                    <m3-button color="success" icon="check" @click.native.stop="remove"></m3-button>
+                                    <m3-button type="danger" icon="times" @click.native.stop="removeCancelled"></m3-button>
+                                    <m3-button type="success" icon="check" @click.native.stop="remove"></m3-button>
                                 </m3-buttons>
                             </div>
                         </li>
@@ -55,6 +55,7 @@ import axios from 'axios'
 import M3Button from '@mach3builders/m3-components/M3Button'
 import M3Buttons from '@mach3builders/m3-components/M3Buttons'
 import M3Collapse from '@mach3builders/m3-components/M3Collapse'
+import M3Icon from '@mach3builders/m3-components/M3Icon'
 import M3Popper from '@mach3builders/m3-components/M3Popper'
 
 export default {
@@ -62,6 +63,7 @@ export default {
         M3Button,
         M3Buttons,
         M3Collapse,
+        M3Icon,
         M3Popper,
     },
 
@@ -99,8 +101,8 @@ export default {
             return null
         },
 
-        iconClasses() {
-            return 'fa-'+(this.data.icon || 'folder')
+        icon() {
+            return this.data.icon || 'folder'
         },
 
         actionsAllowed() {

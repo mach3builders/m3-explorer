@@ -7,8 +7,8 @@
             <m3-popper v-if="!data.static" ref="add-popper">
                 <div class="m3-form-inline">
                     <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="addItem" /></div>
-                    <m3-button color="success" icon="check" @click.native="addItem"></m3-button>
-                    <m3-button color="danger" icon="times" @click.native="hidePopper"></m3-button>
+                    <m3-button type="success" icon="check" @click.native="addItem" flat></m3-button>
+                    <m3-button type="danger" icon="times" @click.native="hidePopper" flat></m3-button>
                 </div>
             </m3-popper>
         </div>

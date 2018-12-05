@@ -309,11 +309,11 @@
   margin-bottom: 0.5rem;
 }
 
-.m3-explorer-items-group-name-wrapper .m3-dropdown {
+.m3-explorer-items-group-name-wrapper .m3-popper {
   padding: 0.5rem;
 }
 
-.m3-explorer-items-group-name-wrapper .m3-dropdown .m3-form-field {
+.m3-explorer-items-group-name-wrapper .m3-popper .m3-form-field {
   margin-right: 0.5rem;
 }
 
@@ -419,21 +419,15 @@
   opacity: 1;
 }
 
-.m3-explorer-item-name-wrapper:hover .m3-explorer-item-icon,
-.m3-explorer-item-name-wrapper.m3-active .m3-explorer-item-icon {
-  color: #343f51;
-}
-
 .m3-explorer-item-name-wrapper:hover .m3-explorer-item-input > input,
 .m3-explorer-item-name-wrapper.m3-active .m3-explorer-item-input > input {
   -webkit-box-shadow: inset 0 -1px 0 #b7c0cd;
           box-shadow: inset 0 -1px 0 #b7c0cd;
 }
 
-.m3-explorer-item-icon {
+.m3-explorer-item-name-wrapper .m3-icon {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  color: #536073;
   -ms-flex-negative: 0;
       flex-shrink: 0;
   height: 2.5rem;

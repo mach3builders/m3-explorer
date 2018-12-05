@@ -33,7 +33,6 @@ export default {
     },
 
     created() {
-        console.log(this.$root);
         // listen to events
         this.$root.eventHub.$on('set-active-item', this.setActiveItem)
         this.$root.eventHub.$on('set-renaming-item', this.setRenamingItem)

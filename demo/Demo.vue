@@ -27,3 +27,9 @@ export default {
     }
 }
 </script>
+
+<style>
+#app {
+    width: 18rem;
+}
+</style>
