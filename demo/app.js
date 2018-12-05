@@ -3458,6 +3458,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 
 
@@ -3939,14 +3941,22 @@ var render = function() {
                                 "m3-buttons",
                                 [
                                   _c("m3-button", {
-                                    attrs: { type: "danger", icon: "times" },
+                                    attrs: {
+                                      type: "danger",
+                                      icon: "times",
+                                      flat: ""
+                                    },
                                     on: {
                                       "button:clicked": _vm.removeCancelled
                                     }
                                   }),
                                   _vm._v(" "),
                                   _c("m3-button", {
-                                    attrs: { type: "success", icon: "check" },
+                                    attrs: {
+                                      type: "success",
+                                      icon: "check",
+                                      flat: ""
+                                    },
                                     on: { "button:clicked": _vm.remove }
                                   })
                                 ],
@@ -4000,15 +4010,29 @@ var render = function() {
                             })
                           ]),
                           _vm._v(" "),
-                          _c("m3-button", {
-                            attrs: { type: "success", icon: "check", flat: "" },
-                            on: { "button:clicked": _vm.add }
-                          }),
-                          _vm._v(" "),
-                          _c("m3-button", {
-                            attrs: { type: "danger", icon: "times", flat: "" },
-                            on: { "button:clicked": _vm.hideAddPopper }
-                          })
+                          _c(
+                            "m3-buttons",
+                            [
+                              _c("m3-button", {
+                                attrs: {
+                                  type: "success",
+                                  icon: "check",
+                                  flat: ""
+                                },
+                                on: { "button:clicked": _vm.add }
+                              }),
+                              _vm._v(" "),
+                              _c("m3-button", {
+                                attrs: {
+                                  type: "danger",
+                                  icon: "times",
+                                  flat: ""
+                                },
+                                on: { "button:clicked": _vm.hideAddPopper }
+                              })
+                            ],
+                            1
+                          )
                         ],
                         1
                       )

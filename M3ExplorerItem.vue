@@ -19,8 +19,8 @@
                             <div>Delete</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
-                                    <m3-button type="danger" icon="times" @button:clicked="removeCancelled"></m3-button>
-                                    <m3-button type="success" icon="check" @button:clicked="remove"></m3-button>
+                                    <m3-button type="danger" icon="times" @button:clicked="removeCancelled" flat></m3-button>
+                                    <m3-button type="success" icon="check" @button:clicked="remove" flat></m3-button>
                                 </m3-buttons>
                             </div>
                         </li>
@@ -30,8 +30,10 @@
                 <m3-popper v-if="!data.static" ref="add-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
                     <div class="m3-form-inline">
                         <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="add" /></div>
-                        <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
-                        <m3-button type="danger" icon="times" @button:clicked="hideAddPopper" flat></m3-button>
+                        <m3-buttons>
+                            <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
+                            <m3-button type="danger" icon="times" @button:clicked="hideAddPopper" flat></m3-button>
+                        </m3-buttons>
                     </div>
                 </m3-popper>
             </div>

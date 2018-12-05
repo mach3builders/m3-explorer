@@ -310,11 +310,13 @@
   margin-bottom: 0.5rem;
 }
 
-.m3-explorer-items-group-name-wrapper .m3-popper {
+.m3-explorer-items-group-name-wrapper .m3-form-inline,
+.m3-explorer-item-name-wrapper .m3-form-inline {
   padding: 0.5rem;
 }
 
-.m3-explorer-items-group-name-wrapper .m3-popper .m3-form-field {
+.m3-explorer-items-group-name-wrapper .m3-form-inline .m3-form-field,
+.m3-explorer-item-name-wrapper .m3-form-inline .m3-form-field {
   margin-right: 0.5rem;
 }
 
