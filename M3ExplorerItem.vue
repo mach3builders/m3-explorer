@@ -1,29 +1,38 @@
 <template>
     <div class="m3-explorer-item-wrapper">
         <div class="m3-explorer-item">
-            <i class="m3-explorer-item-expand far" :class="expandClasses" v-if="hasItems()" @click="toggleItems"></i>
+            <m3-icon :name="expandIcon" v-if="hasItems()" @icon:clicked="toggleItems"></m3-icon>
             <div class="m3-explorer-item-name-wrapper" :class="itemClasses" @click="click">
                 <m3-icon :name="icon" size="large"></m3-icon>
                 <div class="m3-explorer-item-name" v-if="!renaming">{{ data.name }}</div>
                 <div class="m3-explorer-item-input" v-if="renaming" @click.stop>
-                    <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input" />
+                    <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input">
                 </div>
 
-                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @click.native.stop="showPopper" flat></m3-button>
+                <m3-button type="transparent" icon="ellipsis-h" v-if="actionsAllowed" @button:clicked="showActionsPopper" flat></m3-button>
 
-                <m3-popper v-if="actionsAllowed" ref="popper">
+                <m3-popper v-if="actionsAllowed" ref="actions-popper">
                     <ul>
+                        <li @click="add"><div>Add folder</div></li>
                         <li @click="rename"><div>Rename</div></li>
                         <li @click="removeConfirm">
                             <div>Delete</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
-                                    <m3-button type="danger" icon="times" @click.native.stop="removeCancelled"></m3-button>
-                                    <m3-button type="success" icon="check" @click.native.stop="remove"></m3-button>
+                                    <m3-button type="danger" icon="times" @button:clicked="removeCancelled"></m3-button>
+                                    <m3-button type="success" icon="check" @button:clicked="remove"></m3-button>
                                 </m3-buttons>
                             </div>
                         </li>
                     </ul>
+                </m3-popper>
+
+                <m3-popper v-if="!data.static" ref="add-popper">
+                    <div class="m3-form-inline">
+                        <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="add" /></div>
+                        <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
+                        <m3-button type="danger" icon="times" @button:clicked="hideActionsPopper" flat></m3-button>
+                    </div>
                 </m3-popper>
             </div>
         </div>
@@ -94,9 +103,9 @@ export default {
             return classes.trim()
         },
 
-        expandClasses() {
+        expandIcon() {
             if (this.hasItems()) {
-                return this.itemsOpen ? 'fa-angle-down' : 'fa-angle-right'
+                return this.itemsOpen ? 'angle-down' : 'angle-right'
             }
             return null
         },
@@ -170,6 +179,10 @@ export default {
             }
         },
 
+        add() {
+            console.log(this)
+        },
+
         rename() {
             this.renaming = true
             this.$root.eventHub.$emit('set-renaming-item', this)
@@ -184,7 +197,7 @@ export default {
                 }
             })
 
-            this.hidePopper()
+            this.hideActionsPopper()
         },
 
         renamed() {
@@ -217,7 +230,8 @@ export default {
             this.removeConfirmClass = true
         },
 
-        removeCancelled() {
+        removeCancelled(vm, event) {
+            event.stopPropagation()
             this.removeConfirmClass = false
         },
 
@@ -240,15 +254,16 @@ export default {
                 })
             }
 
-            this.hidePopper()
+            this.hideActionsPopper()
         },
 
-        showPopper: function(event) {
-            this.removeCancelled()
+        showActionsPopper: function(vm, event) {
+            event.stopPropagation()
+            this.removeCancelled(vm, event)
             this.focus = true
 
-            const ref = this.$refs['popper']
-            ref.setDispatcher(event.currentTarget)
+            const ref = this.$refs['actions-popper']
+            ref.setDispatcher(vm)
             ref.setHideCallback(() => {
                 this.focus = false
             })
@@ -257,8 +272,19 @@ export default {
             this.$root.eventHub.$emit('hide-renaming-item-popper')
         },
 
-        hidePopper() {
-            this.$refs['popper'].hide()
+        hideActionsPopper() {
+            this.$refs['actions-popper'].hide()
+        },
+
+        showAddPopper: function(vm, event) {
+            const ref = this.$refs['add-popper']
+            ref.setDispatcher(vm)
+            ref.setHideCallback(() => {
+                this.focus = false
+            })
+            ref.show()
+
+            this.hideActionsPopper()
         }
     }
 }

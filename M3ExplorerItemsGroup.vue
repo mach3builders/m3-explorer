@@ -2,13 +2,15 @@
     <div class="m3-explorer-items-group">
         <div class="m3-explorer-items-group-name-wrapper">
             <div class="m3-explorer-items-group-name">{{ data.name }}</div>
-            <m3-button icon="folder-plus" @click.native.stop="showPopper" v-if="!data.static" flat></m3-button>
+            <m3-button type="transparent" icon="folder-plus" size="large" @button:clicked="showPopper" v-if="!data.static" flat></m3-button>
 
             <m3-popper v-if="!data.static" ref="add-popper">
                 <div class="m3-form-inline">
                     <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="addItem" /></div>
-                    <m3-button type="success" icon="check" @click.native="addItem" flat></m3-button>
-                    <m3-button type="danger" icon="times" @click.native="hidePopper" flat></m3-button>
+                    <m3-buttons>
+                        <m3-button type="success" icon="check" @click.native="addItem" flat></m3-button>
+                        <m3-button type="danger" icon="times" @click.native="hidePopper" flat></m3-button>
+                    </m3-buttons>
                 </div>
             </m3-popper>
         </div>
@@ -42,12 +44,14 @@
 <script>
 import axios from 'axios'
 import M3Button from '@mach3builders/m3-components/M3Button'
+import M3Buttons from '@mach3builders/m3-components/M3Buttons'
 import M3Popper from '@mach3builders/m3-components/M3Popper'
 import M3ExplorerItem from './M3ExplorerItem'
 
 export default {
     components: {
         M3Button,
+        M3Buttons,
         M3Popper,
         M3ExplorerItem,
     },
@@ -106,11 +110,12 @@ export default {
             if (this.dynamicItems.length) this.sortItems(this.dynamicItems)
         },
 
-        showPopper: function(event) {
+        showPopper: function(vm, event) {
+            event.stopPropagation()
             const popperRef = this.$refs['add-popper']
 
             if (popperRef) {
-                popperRef.setDispatcher(event.currentTarget)
+                popperRef.setDispatcher(vm)
                 popperRef.show()
 
                 // focus on the input field, but first wait till the dom is updated

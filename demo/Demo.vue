@@ -29,7 +29,13 @@ export default {
 </script>
 
 <style>
+body {
+    background-color: #eff3f6;
+    margin: 0;
+}
+
 #app {
+    padding: 1rem;
     width: 18rem;
 }
 </style>
