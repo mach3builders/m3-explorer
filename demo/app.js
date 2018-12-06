@@ -2975,14 +2975,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   created: function created() {
     // listen to events
-    this.$root.eventHub.$on('sort-items', this.sortItems);
-    this.$root.eventHub.$on('explorer-item:added', this.addItem); // sort all initial items
+    this.$root.eventHub.$on('sort-items', this.sortItems); // sort all initial items
 
     this.sortAllItems();
   },
   beforeDestroy: function beforeDestroy() {
     this.$root.eventHub.$off('sort-items', this.sortItems);
-    this.$root.eventHub.$off('explorer-item:added', this.addItem);
   },
   methods: {
     sortItems: function sortItems(data) {
@@ -3037,48 +3035,34 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         inputRef.value = '';
       }
     },
-    addItem: function addItem(event, vm, parentData) {
+    addItem: function addItem() {
       var _this2 = this;
 
-      var ref = vm ? vm.$refs['add-input'] : this.$refs['add-input'];
+      var ref = this.$refs['add-input'];
 
       if (this.urls.addItem && ref && ref.value.trim()) {
-        if (!vm || vm && vm.$parent === this) {
-          if (vm) console.log(vm.$parent); // show loader
-          //this.$set(item, 'loading', true)
-          // create form data, so we can catch $_POST with PHP for instance...
+        // show loader
+        //this.$set(item, 'loading', true)
+        // create form data, so we can catch $_POST with PHP for instance...
+        var formData = new FormData();
+        formData.append('group', this.data.id || 0);
+        formData.append('value', ref.value.trim() || ''); // make request
 
-          var formData = new FormData();
-          formData.append('group', this.data.id || 0);
-          formData.append('parent', parentData ? parentData.id : 0);
-          formData.append('value', ref.value.trim() || ''); // make request
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
+          if (_this2.data.items.dynamic) {
+            _this2.data.items.dynamic.push(response.data.data);
 
-          __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
-            _this2.hidePopper();
+            _this2.sortItems(_this2.data.items.dynamic);
+          } else {
+            _this2.data.items.push(response.data.data);
 
-            if (_this2.data.items.dynamic) {
-              if (!parentData) {
-                _this2.data.items.dynamic.push(response.data.data);
+            _this2.sortItems(_this2.data.items);
+          }
 
-                _this2.sortItems(_this2.data.items.dynamic);
-              } else {
-                if (!parentData.items) {
-                  _this2.$set(parentData, 'items', []);
-                }
-
-                parentData.items.push(response.data.data);
-
-                _this2.sortItems(parentData.items);
-              }
-            } else {
-              _this2.data.items.push(response.data.data);
-
-              _this2.sortItems(_this2.data.items);
-            }
-          }).catch(function (error) {
-            console.error(error);
-          });
-        }
+          _this2.hidePopper();
+        }).catch(function (error) {
+          console.error(error);
+        });
       }
     }
   }
@@ -3590,17 +3574,43 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     add: function add(vm, event) {
-      this.$root.eventHub.$emit('explorer-item:added', event, this, this.data);
-      this.hideAddPopper();
+      var _this2 = this;
+
+      var ref = this.$refs['add-input'];
+
+      if (this.urls.addItem && ref && ref.value.trim()) {
+        var formData = new FormData();
+        formData.append('group', this.groupId || 0);
+        formData.append('parent', this.data.id || 0);
+        formData.append('value', ref.value.trim() || ''); // make request
+
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
+          if (!_this2.data.items) {
+            _this2.$set(_this2.data, 'items', []);
+          }
+
+          _this2.data.items.push(response.data.data); // open when closed
+
+
+          if (!_this2.itemsOpen) {
+            _this2.$nextTick(function () {
+              _this2.itemsOpen = true;
+            });
+          }
+        }).catch(function (error) {
+          console.error(error);
+        });
+        this.hideAddPopper();
+      }
     },
     rename: function rename() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.renaming = true;
       this.$root.eventHub.$emit('set-renaming-item', this); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
-        var ref = _this2.$refs['input'];
+        var ref = _this3.$refs['input'];
 
         if (ref) {
           ref.focus();
@@ -3610,7 +3620,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.hideActionsPopper();
     },
     renamed: function renamed() {
-      var _this3 = this;
+      var _this4 = this;
 
       if (this.renaming && this.data.name.trim()) {
         if (this.urls.renameItem) {
@@ -3621,10 +3631,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           formData.append('group_id', this.groupId || 0);
           formData.append('value', this.data.name.trim() || '');
           __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.renameItem, formData).then(function (response) {
-            _this3.loading = false;
-            _this3.renaming = false;
+            _this4.loading = false;
+            _this4.renaming = false;
 
-            _this3.$root.eventHub.$emit('sort-items', _this3.collection);
+            _this4.$root.eventHub.$emit('sort-items', _this4.collection);
           }).catch(function (error) {
             console.error(error);
           });
@@ -3641,7 +3651,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.removeConfirmClass = false;
     },
     remove: function remove() {
-      var _this4 = this;
+      var _this5 = this;
 
       if (this.urls.removeItem) {
         this.loading = true; // create form data, so we can catch $_POST with PHP for instance...
@@ -3650,9 +3660,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('id', this.data.id || 0);
         formData.append('group_id', this.groupId || 0);
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.removeItem, formData).then(function (response) {
-          _this4.collection.splice(_this4.collection.indexOf(_this4.data), 1);
+          _this5.collection.splice(_this5.collection.indexOf(_this5.data), 1);
 
-          _this4.loading = false;
+          _this5.loading = false;
         }).catch(function (error) {
           console.error(error);
         });
@@ -3672,7 +3682,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$refs['actions-popper'].hide();
     },
     showAddPopper: function showAddPopper() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.focus = true;
       var dispatcherRef = this.$refs['actions-button'];
@@ -3681,7 +3691,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       popperRef.show(); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
-        var inputRef = _this5.$refs['add-input'];
+        var inputRef = _this6.$refs['add-input'];
 
         if (inputRef) {
           inputRef.focus();

@@ -75,7 +75,6 @@ export default {
     created() {
         // listen to events
         this.$root.eventHub.$on('sort-items', this.sortItems)
-        this.$root.eventHub.$on('explorer-item:added', this.addItem)
 
         // sort all initial items
         this.sortAllItems()
@@ -83,7 +82,6 @@ export default {
 
     beforeDestroy() {
         this.$root.eventHub.$off('sort-items', this.sortItems)
-        this.$root.eventHub.$off('explorer-item:added', this.addItem)
     },
 
     methods: {
@@ -140,46 +138,34 @@ export default {
             }
         },
 
-        addItem(event, vm, parentData) {
-            const ref = vm ? vm.$refs['add-input'] : this.$refs['add-input']
+        addItem() {
+            const ref = this.$refs['add-input']
+
             if (this.urls.addItem && ref && ref.value.trim()) {
-                if (!vm || (vm && vm.$parent === this)) {
-               if (vm) console.log(vm.$parent)
-                    // show loader
-                    //this.$set(item, 'loading', true)
+                // show loader
+                //this.$set(item, 'loading', true)
 
-                    // create form data, so we can catch $_POST with PHP for instance...
-                    const formData = new FormData()
-                    formData.append('group', this.data.id || 0)
-                    formData.append('parent', parentData ? parentData.id : 0)
-                    formData.append('value', ref.value.trim() || '')
+                // create form data, so we can catch $_POST with PHP for instance...
+                const formData = new FormData()
+                formData.append('group', this.data.id || 0)
+                formData.append('value', ref.value.trim() || '')
 
-                    // make request
-                    axios.post(this.urls.addItem, formData)
-                    .then((response) => {
-                        this.hidePopper()
+                // make request
+                axios.post(this.urls.addItem, formData)
+                .then((response) => {
+                    if (this.data.items.dynamic) {
+                        this.data.items.dynamic.push(response.data.data)
+                        this.sortItems(this.data.items.dynamic)
+                    } else {
+                        this.data.items.push(response.data.data)
+                        this.sortItems(this.data.items)
+                    }
 
-                        if (this.data.items.dynamic) {
-                            if (!parentData) {
-                                this.data.items.dynamic.push(response.data.data)
-                                this.sortItems(this.data.items.dynamic)
-                            } else {
-                                if (!parentData.items) {
-                                    this.$set(parentData, 'items', [])
-                                }
-
-                                parentData.items.push(response.data.data)
-                                this.sortItems(parentData.items)
-                            }
-                        } else {
-                            this.data.items.push(response.data.data)
-                            this.sortItems(this.data.items)
-                        }
-                    })
-                    .catch((error) => {
-                        console.error(error)
-                    })
-                }
+                    this.hidePopper()
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
             }
         },
     }

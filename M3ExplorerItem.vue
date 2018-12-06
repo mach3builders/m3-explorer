@@ -190,8 +190,35 @@ export default {
         },
 
         add(vm, event) {
-            this.$root.eventHub.$emit('explorer-item:added', event, this, this.data)
-            this.hideAddPopper()
+            const ref = this.$refs['add-input']
+
+            if (this.urls.addItem && ref && ref.value.trim()) {
+                const formData = new FormData()
+                formData.append('group', this.groupId || 0)
+                formData.append('parent', this.data.id || 0)
+                formData.append('value', ref.value.trim() || '')
+
+                // make request
+                axios.post(this.urls.addItem, formData)
+                .then((response) => {
+                    if (!this.data.items) {
+                        this.$set(this.data, 'items', [])
+                    }
+                    this.data.items.push(response.data.data)
+
+                    // open when closed
+                    if (!this.itemsOpen) {
+                        this.$nextTick(() => {
+                            this.itemsOpen = true
+                        })
+                    }
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
+                this.hideAddPopper()
+            }
         },
 
         rename() {
