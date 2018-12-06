@@ -1588,9 +1588,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   data: function data() {
     return {
       settings: {
+        text: {
+          addItemAction: 'Add folder',
+          moveItemAction: 'Move to',
+          renameItemAction: 'Rename',
+          removeItemAction: 'Delete'
+        },
         urls: {
-          loadData: 'data/load-data.json',
-          loadItemData: 'data/load-item-data.php',
+          loadData: 'data/load-items.json',
+          getItem: 'data/get-item.php',
           addItem: 'data/add-item.php',
           removeItem: 'data/remove-item.php',
           renameItem: 'data/rename-item.php'
@@ -1676,13 +1682,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     settings: Object
   },
   data: function data() {
-    var settings = this.mergeSettings();
     return {
       activeItem: null,
       renamingItem: null,
       data: [],
-      events: settings.events,
-      urls: settings.urls
+      groupSettings: this.mergeSettings()
     };
   },
   created: function created() {
@@ -1693,8 +1697,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     this.$root.eventHub.$on('set-renaming-item', this.setRenamingItem);
     this.$root.eventHub.$on('hide-renaming-item-popper', this.hideRenamingItemPopper); // load data
 
-    if (this.urls.loadData) {
-      __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.urls.loadData).then(function (response) {
+    if (this.groupSettings.urls.loadData) {
+      __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.groupSettings.urls.loadData).then(function (response) {
         _this.data = response.data;
 
         _this.initActiveItem();
@@ -1713,17 +1717,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   methods: {
     mergeSettings: function mergeSettings() {
       var events = {};
+      var text = {};
       var urls = {};
       Object.assign(events, {
-        loadItemData: function loadItemData(data) {
-          console.warn('You have to define an event when an item is loaded.');
+        getItem: function getItem(data) {
+          console.warn('You can define an event when an item is fetched.');
         }
       }, this.settings.events);
+      Object.assign(text, {
+        addItemAction: 'Add',
+        renameItemAction: 'Rename',
+        moveItemAction: 'Move',
+        removeItemAction: 'Remove'
+      }, this.settings.text);
       Object.assign(urls, {
         loadData: ''
       }, this.settings.urls);
       return {
         events: events,
+        text: text,
         urls: urls
       };
     },
@@ -2946,8 +2958,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
 
 
 
@@ -2962,8 +2972,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   props: {
     data: Object,
-    events: Object,
-    urls: Object
+    settings: Object
   },
   computed: {
     staticItems: function staticItems() {
@@ -3040,7 +3049,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       var ref = this.$refs['add-input'];
 
-      if (this.urls.addItem && ref && ref.value.trim()) {
+      if (this.settings.urls.addItem && ref && ref.value.trim()) {
         // show loader
         //this.$set(item, 'loading', true)
         // create form data, so we can catch $_POST with PHP for instance...
@@ -3048,7 +3057,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('group', this.data.id || 0);
         formData.append('value', ref.value.trim() || ''); // make request
 
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.addItem, formData).then(function (response) {
           if (_this2.data.items.dynamic) {
             _this2.data.items.dynamic.push(response.data.data);
 
@@ -3459,7 +3468,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 
 
@@ -3477,10 +3485,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   props: {
     collection: Array,
     data: Object,
-    events: Object,
     groupId: Number,
     groupIsStatic: Boolean,
-    urls: Object
+    settings: Object
   },
   data: function data() {
     return {
@@ -3553,9 +3560,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       if (this.data.active) return;
 
-      if (this.urls.loadItemData) {
+      if (this.settings.urls.getItem) {
         this.loading = true;
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.urls.loadItemData, {
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.settings.urls.getItem, {
           params: {
             group_id: this.groupId || 0,
             id: this.data.id || 0
@@ -3565,7 +3572,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
           _this.$set(_this.data, 'active', true);
 
-          _this.events.loadItemData(response.data);
+          _this.settings.events.getItem(response.data);
 
           _this.$root.eventHub.$emit('set-active-item', _this.data);
         }).catch(function (error) {
@@ -3573,18 +3580,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         });
       }
     },
-    add: function add(vm, event) {
+    add: function add() {
       var _this2 = this;
 
       var ref = this.$refs['add-input'];
 
-      if (this.urls.addItem && ref && ref.value.trim()) {
+      if (this.settings.urls.addItem && ref && ref.value.trim()) {
         var formData = new FormData();
         formData.append('group', this.groupId || 0);
         formData.append('parent', this.data.id || 0);
         formData.append('value', ref.value.trim() || ''); // make request
 
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.addItem, formData).then(function (response) {
           if (!_this2.data.items) {
             _this2.$set(_this2.data, 'items', []);
           }
@@ -3603,6 +3610,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.hideAddPopper();
       }
     },
+    move: function move() {},
     rename: function rename() {
       var _this3 = this;
 
@@ -3623,14 +3631,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var _this4 = this;
 
       if (this.renaming && this.data.name.trim()) {
-        if (this.urls.renameItem) {
+        if (this.settings.urls.renameItem) {
           this.loading = true; // create form data, so we can catch $_POST with PHP for instance...
 
           var formData = new FormData();
           formData.append('id', this.data.id || 0);
           formData.append('group_id', this.groupId || 0);
           formData.append('value', this.data.name.trim() || '');
-          __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.renameItem, formData).then(function (response) {
+          __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.renameItem, formData).then(function (response) {
             _this4.loading = false;
             _this4.renaming = false;
 
@@ -3653,13 +3661,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     remove: function remove() {
       var _this5 = this;
 
-      if (this.urls.removeItem) {
+      if (this.settings.urls.removeItem) {
         this.loading = true; // create form data, so we can catch $_POST with PHP for instance...
 
         var formData = new FormData();
         formData.append('id', this.data.id || 0);
         formData.append('group_id', this.groupId || 0);
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.removeItem, formData).then(function (response) {
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.removeItem, formData).then(function (response) {
           _this5.collection.splice(_this5.collection.indexOf(_this5.data), 1);
 
           _this5.loading = false;
@@ -3965,15 +3973,27 @@ var render = function() {
                     [
                       _c("ul", [
                         _c("li", { on: { click: _vm.showAddPopper } }, [
-                          _c("div", [_vm._v("Add folder")])
+                          _c("div", [
+                            _vm._v(_vm._s(_vm.settings.text.addItemAction))
+                          ])
+                        ]),
+                        _vm._v(" "),
+                        _c("li", { on: { click: _vm.move } }, [
+                          _c("div", [
+                            _vm._v(_vm._s(_vm.settings.text.moveItemAction))
+                          ])
                         ]),
                         _vm._v(" "),
                         _c("li", { on: { click: _vm.rename } }, [
-                          _c("div", [_vm._v("Rename")])
+                          _c("div", [
+                            _vm._v(_vm._s(_vm.settings.text.renameItemAction))
+                          ])
                         ]),
                         _vm._v(" "),
                         _c("li", { on: { click: _vm.removeConfirm } }, [
-                          _c("div", [_vm._v("Delete")]),
+                          _c("div", [
+                            _vm._v(_vm._s(_vm.settings.text.removeItemAction))
+                          ]),
                           _vm._v(" "),
                           _c(
                             "div",
@@ -4104,8 +4124,7 @@ var render = function() {
                     data: item,
                     groupId: _vm.groupId,
                     groupIsStatic: true,
-                    urls: _vm.urls,
-                    events: _vm.events
+                    settings: _vm.settings
                   }
                 })
               }),
@@ -4118,8 +4137,7 @@ var render = function() {
                     data: item,
                     groupId: _vm.groupId,
                     groupIsStatic: _vm.groupIsStatic,
-                    urls: _vm.urls,
-                    events: _vm.events
+                    settings: _vm.settings
                   }
                 })
               })
@@ -4246,8 +4264,7 @@ var render = function() {
                       data: item,
                       groupId: _vm.data.id,
                       groupIsStatic: true,
-                      urls: _vm.urls,
-                      events: _vm.events
+                      settings: _vm.settings
                     }
                   })
                 })
@@ -4266,8 +4283,7 @@ var render = function() {
                       data: item,
                       groupId: _vm.data.id,
                       groupIsStatic: _vm.data.static,
-                      urls: _vm.urls,
-                      events: _vm.events
+                      settings: _vm.settings
                     }
                   })
                 })
@@ -4304,7 +4320,7 @@ var render = function() {
       _vm._l(_vm.data, function(group) {
         return _c("m3-explorer-items-group", {
           key: group.id,
-          attrs: { data: group, urls: _vm.urls, events: _vm.events }
+          attrs: { data: group, settings: _vm.groupSettings }
         })
       })
     )

@@ -13,10 +13,11 @@
 
                 <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
                     <ul>
-                        <li @click="showAddPopper"><div>Add folder</div></li>
-                        <li @click="rename"><div>Rename</div></li>
+                        <li @click="showAddPopper"><div>{{ settings.text.addItemAction }}</div></li>
+                        <li @click="move"><div>{{ settings.text.moveItemAction }}</div></li>
+                        <li @click="rename"><div>{{ settings.text.renameItemAction }}</div></li>
                         <li @click="removeConfirm">
-                            <div>Delete</div>
+                            <div>{{ settings.text.removeItemAction }}</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
                                     <m3-button type="danger" icon="times" @button:clicked="removeCancelled" flat></m3-button>
@@ -46,8 +47,7 @@
                 :data="item"
                 :groupId="groupId"
                 :groupIsStatic="true"
-                :urls="urls"
-                :events="events" />
+                :settings="settings" />
 
             <m3-explorer-item v-for="item in dynamicItems"
                 :key="item.id"
@@ -55,8 +55,7 @@
                 :data="item"
                 :groupId="groupId"
                 :groupIsStatic="groupIsStatic"
-                :urls="urls"
-                :events="events" />
+                :settings="settings" />
         </m3-collapse>
     </div>
 </template>
@@ -81,10 +80,9 @@ export default {
     props: {
         collection: Array,
         data: Object,
-        events: Object,
         groupId: Number,
         groupIsStatic: Boolean,
-        urls: Object,
+        settings: Object,
     },
 
     data() {
@@ -167,10 +165,10 @@ export default {
         click() {
             if (this.data.active) return
 
-            if (this.urls.loadItemData) {
+            if (this.settings.urls.getItem) {
                 this.loading = true
 
-                axios.get(this.urls.loadItemData, {
+                axios.get(this.settings.urls.getItem, {
                     params: {
                         group_id: this.groupId || 0,
                         id: this.data.id || 0,
@@ -179,7 +177,7 @@ export default {
                 .then((response) => {
                     this.loading = false
                     this.$set(this.data, 'active', true)
-                    this.events.loadItemData(response.data)
+                    this.settings.events.getItem(response.data)
 
                     this.$root.eventHub.$emit('set-active-item', this.data)
                 })
@@ -189,17 +187,17 @@ export default {
             }
         },
 
-        add(vm, event) {
+        add() {
             const ref = this.$refs['add-input']
 
-            if (this.urls.addItem && ref && ref.value.trim()) {
+            if (this.settings.urls.addItem && ref && ref.value.trim()) {
                 const formData = new FormData()
                 formData.append('group', this.groupId || 0)
                 formData.append('parent', this.data.id || 0)
                 formData.append('value', ref.value.trim() || '')
 
                 // make request
-                axios.post(this.urls.addItem, formData)
+                axios.post(this.settings.urls.addItem, formData)
                 .then((response) => {
                     if (!this.data.items) {
                         this.$set(this.data, 'items', [])
@@ -221,6 +219,10 @@ export default {
             }
         },
 
+        move() {
+            
+        },
+
         rename() {
             this.renaming = true
             this.$root.eventHub.$emit('set-renaming-item', this)
@@ -240,7 +242,7 @@ export default {
 
         renamed() {
             if (this.renaming && this.data.name.trim()) {
-                if (this.urls.renameItem) {
+                if (this.settings.urls.renameItem) {
                     this.loading = true
 
                     // create form data, so we can catch $_POST with PHP for instance...
@@ -249,7 +251,7 @@ export default {
                     formData.append('group_id', this.groupId || 0)
                     formData.append('value', this.data.name.trim() || '')
 
-                    axios.post(this.urls.renameItem, formData)
+                    axios.post(this.settings.urls.renameItem, formData)
                     .then((response) => {
                         this.loading = false
                         this.renaming = false
@@ -274,7 +276,7 @@ export default {
         },
 
         remove() {
-            if (this.urls.removeItem) {
+            if (this.settings.urls.removeItem) {
                 this.loading = true
 
                 // create form data, so we can catch $_POST with PHP for instance...
@@ -282,7 +284,7 @@ export default {
                 formData.append('id', this.data.id || 0)
                 formData.append('group_id', this.groupId || 0)
 
-                axios.post(this.urls.removeItem, formData)
+                axios.post(this.settings.urls.removeItem, formData)
                 .then((response) => {
                     this.collection.splice(this.collection.indexOf(this.data), 1)
                     this.loading = false

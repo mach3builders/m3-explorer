@@ -2,7 +2,7 @@
     <div class="m3-explorer">
         <div class="m3-explorer-header"></div>
         <div class="m3-explorer-body">
-            <m3-explorer-items-group v-for="group in data" :key="group.id" :data="group" :urls="urls" :events="events" />
+            <m3-explorer-items-group v-for="group in data" :key="group.id" :data="group" :settings="groupSettings" />
         </div>
     </div>
 </template>
@@ -21,14 +21,11 @@ export default {
     },
 
     data() {
-        const settings = this.mergeSettings()
-
         return {
             activeItem: null,
             renamingItem: null,
             data: [],
-            events: settings.events,
-            urls: settings.urls,
+            groupSettings: this.mergeSettings(),
         }
     },
 
@@ -39,8 +36,8 @@ export default {
         this.$root.eventHub.$on('hide-renaming-item-popper', this.hideRenamingItemPopper)
 
         // load data
-        if (this.urls.loadData) {
-            axios.get(this.urls.loadData)
+        if (this.groupSettings.urls.loadData) {
+            axios.get(this.groupSettings.urls.loadData)
             .then((response) => {
                 this.data = response.data
 
@@ -63,13 +60,21 @@ export default {
     methods: {
         mergeSettings() {
             const events = {}
+            const text = {}
             const urls = {}
 
             Object.assign(events, {
-                loadItemData: (data) => {
-                    console.warn('You have to define an event when an item is loaded.')
+                getItem: (data) => {
+                    console.warn('You can define an event when an item is fetched.')
                 }
             }, this.settings.events)
+
+            Object.assign(text, {
+                addItemAction: 'Add',
+                renameItemAction: 'Rename',
+                moveItemAction: 'Move',
+                removeItemAction: 'Remove',
+            }, this.settings.text)
 
             Object.assign(urls, {
                 loadData: ''
@@ -77,6 +82,7 @@ export default {
 
             return {
                 events: events,
+                text: text,
                 urls: urls,
             }
         },

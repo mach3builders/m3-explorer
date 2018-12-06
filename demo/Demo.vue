@@ -15,9 +15,15 @@ export default {
     data() {
         return {
             settings: {
+                text: {
+                    addItemAction: 'Add folder',
+                    moveItemAction: 'Move to',
+                    renameItemAction: 'Rename',
+                    removeItemAction: 'Delete',
+                },
                 urls: {
-                    loadData: 'data/load-data.json',
-                    loadItemData: 'data/load-item-data.php',
+                    loadData: 'data/load-items.json',
+                    getItem: 'data/get-item.php',
                     addItem: 'data/add-item.php',
                     removeItem: 'data/remove-item.php',
                     renameItem: 'data/rename-item.php'

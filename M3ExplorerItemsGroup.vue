@@ -23,8 +23,7 @@
                     :data="item"
                     :groupId="data.id"
                     :groupIsStatic="true"
-                    :urls="urls"
-                    :events="events" />
+                    :settings="settings" />
             </div>
 
             <div class="m3-explorer-items" v-if="dynamicItems.length">
@@ -34,8 +33,7 @@
                     :data="item"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
-                    :urls="urls"
-                    :events="events" />
+                    :settings="settings" />
             </div>
         </div>
     </div>
@@ -58,8 +56,7 @@ export default {
 
     props: {
         data: Object,
-        events: Object,
-        urls: Object,
+        settings: Object,
     },
 
     computed: {
@@ -141,7 +138,7 @@ export default {
         addItem() {
             const ref = this.$refs['add-input']
 
-            if (this.urls.addItem && ref && ref.value.trim()) {
+            if (this.settings.urls.addItem && ref && ref.value.trim()) {
                 // show loader
                 //this.$set(item, 'loading', true)
 
@@ -151,7 +148,7 @@ export default {
                 formData.append('value', ref.value.trim() || '')
 
                 // make request
-                axios.post(this.urls.addItem, formData)
+                axios.post(this.settings.urls.addItem, formData)
                 .then((response) => {
                     if (this.data.items.dynamic) {
                         this.data.items.dynamic.push(response.data.data)
