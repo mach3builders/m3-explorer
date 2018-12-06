@@ -2958,6 +2958,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
@@ -2980,6 +2981,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     dynamicItems: function dynamicItems() {
       return this.data.items.length ? this.data.items : this.data.items.dynamic || [];
+    },
+    collectionOptions: function collectionOptions() {
+      return !this.data.static ? this.flattenItems(this.dynamicItems) : [];
     }
   },
   created: function created() {
@@ -2992,6 +2996,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     this.$root.eventHub.$off('sort-items', this.sortItems);
   },
   methods: {
+    flattenItems: function flattenItems(items, level) {
+      var _this = this;
+
+      var final = [];
+      level = level || 0;
+
+      if (items && items.length && !items.static) {
+        var indent = '';
+
+        for (var i = 0; i < level; i++) {
+          indent += '&nbsp;&nbsp;&nbsp;';
+        }
+
+        items.forEach(function (item, index) {
+          _this.$set(item, 'option', indent + item.name);
+
+          final.push(item);
+
+          if (typeof item.items !== 'undefined') {
+            final = final.concat(_this.flattenItems(item.items, level + 1));
+          }
+        });
+      }
+
+      return final;
+    },
     sortItems: function sortItems(data) {
       if (data.length) {
         data.sort(function (a, b) {
@@ -3017,7 +3047,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (this.dynamicItems.length) this.sortItems(this.dynamicItems);
     },
     showPopper: function showPopper(vm, event) {
-      var _this = this;
+      var _this2 = this;
 
       event.stopPropagation();
       var popperRef = this.$refs['add-popper'];
@@ -3027,7 +3057,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         popperRef.show(); // focus on the input field, but first wait till the dom is updated
 
         this.$nextTick(function () {
-          var inputRef = _this.$refs['add-input'];
+          var inputRef = _this2.$refs['add-input'];
 
           if (inputRef) {
             inputRef.focus();
@@ -3045,7 +3075,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     addItem: function addItem() {
-      var _this2 = this;
+      var _this3 = this;
 
       var ref = this.$refs['add-input'];
 
@@ -3058,17 +3088,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('value', ref.value.trim() || ''); // make request
 
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.addItem, formData).then(function (response) {
-          if (_this2.data.items.dynamic) {
-            _this2.data.items.dynamic.push(response.data.data);
+          if (_this3.data.items.dynamic) {
+            _this3.data.items.dynamic.push(response.data.data);
 
-            _this2.sortItems(_this2.data.items.dynamic);
+            _this3.sortItems(_this3.data.items.dynamic);
           } else {
-            _this2.data.items.push(response.data.data);
+            _this3.data.items.push(response.data.data);
 
-            _this2.sortItems(_this2.data.items);
+            _this3.sortItems(_this3.data.items);
           }
 
-          _this2.hidePopper();
+          _this3.hidePopper();
         }).catch(function (error) {
           console.error(error);
         });
@@ -3468,6 +3498,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -3484,6 +3529,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   props: {
     collection: Array,
+    collectionOptions: Array,
     data: Object,
     groupId: Number,
     groupIsStatic: Boolean,
@@ -3713,6 +3759,31 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (popperRef && inputRef) {
         popperRef.hide();
         inputRef.value = '';
+      }
+    },
+    showMovePopper: function showMovePopper() {
+      var _this7 = this;
+
+      this.focus = true;
+      var dispatcherRef = this.$refs['actions-button'];
+      var popperRef = this.$refs['move-popper'];
+      popperRef.setDispatcher(dispatcherRef);
+      popperRef.show(); // focus on the input field, but first wait till the dom is updated
+
+      this.$nextTick(function () {
+        var inputRef = _this7.$refs['move-input'];
+
+        if (inputRef) {
+          inputRef.focus();
+        }
+      });
+    },
+    hideMovePopper: function hideMovePopper() {
+      var popperRef = this.$refs['move-popper'];
+      var inputRef = this.$refs['move-input'];
+
+      if (popperRef && inputRef) {
+        popperRef.hide(); //inputRef.value = ''
       }
     }
   }
@@ -3978,7 +4049,7 @@ var render = function() {
                           ])
                         ]),
                         _vm._v(" "),
-                        _c("li", { on: { click: _vm.move } }, [
+                        _c("li", { on: { click: _vm.showMovePopper } }, [
                           _c("div", [
                             _vm._v(_vm._s(_vm.settings.text.moveItemAction))
                           ])
@@ -4103,6 +4174,69 @@ var render = function() {
                       )
                     ]
                   )
+                : _vm._e(),
+              _vm._v(" "),
+              !_vm.data.static
+                ? _c(
+                    "m3-popper",
+                    {
+                      ref: "move-popper",
+                      on: {
+                        "popper:shown": _vm.focusItem,
+                        "popper:hidden": _vm.blurItem
+                      }
+                    },
+                    [
+                      _c(
+                        "div",
+                        { staticClass: "m3-form-inline" },
+                        [
+                          _c("div", { staticClass: "m3-form-field" }, [
+                            _c(
+                              "select",
+                              { ref: "move-input" },
+                              _vm._l(_vm.collectionOptions, function(
+                                collectionOption
+                              ) {
+                                return _c("option", {
+                                  key: collectionOption.id,
+                                  attrs: { value: "-" },
+                                  domProps: {
+                                    innerHTML: _vm._s(collectionOption.option)
+                                  }
+                                })
+                              })
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "m3-buttons",
+                            [
+                              _c("m3-button", {
+                                attrs: {
+                                  type: "success",
+                                  icon: "check",
+                                  flat: ""
+                                },
+                                on: { "button:clicked": _vm.move }
+                              }),
+                              _vm._v(" "),
+                              _c("m3-button", {
+                                attrs: {
+                                  type: "danger",
+                                  icon: "times",
+                                  flat: ""
+                                },
+                                on: { "button:clicked": _vm.hideMovePopper }
+                              })
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ]
+                  )
                 : _vm._e()
             ],
             1
@@ -4134,6 +4268,7 @@ var render = function() {
                   key: item.id,
                   attrs: {
                     collection: _vm.dynamicItems,
+                    collectionOptions: _vm.collectionOptions,
                     data: item,
                     groupId: _vm.groupId,
                     groupIsStatic: _vm.groupIsStatic,
@@ -4280,6 +4415,7 @@ var render = function() {
                     key: item.id,
                     attrs: {
                       collection: _vm.dynamicItems,
+                      collectionOptions: _vm.collectionOptions,
                       data: item,
                       groupId: _vm.data.id,
                       groupIsStatic: _vm.data.static,

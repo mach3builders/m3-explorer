@@ -249,7 +249,12 @@
   display: flex;
 }
 
-.m3-form-field input {
+.m3-form-field {
+  min-width: 9rem;
+}
+
+.m3-form-field input,
+.m3-form-field select {
   background-color: #ffffff;
   border: 1px solid #dee2e6;
   border-radius: 3px;
@@ -261,11 +266,17 @@
   padding: 0 0.5rem;
   -webkit-transition: border-color 200ms;
   transition: border-color 200ms;
+  width: 100%;
 }
 
-.m3-form-field input:focus {
+.m3-form-field input:focus,
+.m3-form-field select:focus {
   border-color: #b7c0cd;
   outline: 0;
+}
+
+.m3-form-field select {
+  padding: 0;
 }
 
 .m3-icon {
@@ -473,6 +484,7 @@
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   font-family: Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
   height: 1.5rem;
   padding: 0;
   -webkit-transition: -webkit-box-shadow 200ms;

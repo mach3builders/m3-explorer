@@ -30,6 +30,7 @@
                 <m3-explorer-item v-for="item in dynamicItems"
                     :key="item.id"
                     :collection="dynamicItems"
+                    :collectionOptions="collectionOptions"
                     :data="item"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
@@ -66,6 +67,10 @@ export default {
 
         dynamicItems() {
             return this.data.items.length ? this.data.items : (this.data.items.dynamic || [])
+        },
+
+        collectionOptions() {
+            return !this.data.static ? this.flattenItems(this.dynamicItems) : []
         }
     },
 
@@ -82,6 +87,29 @@ export default {
     },
 
     methods: {
+        flattenItems(items, level) {
+            let final = []
+            level = level || 0
+
+            if (items && items.length && !items.static) {
+                let indent = ''
+
+                for (let i=0; i<level; i++) {
+                    indent += '&nbsp;&nbsp;&nbsp;';
+                }
+
+                items.forEach((item, index) => {
+                    this.$set(item, 'option', indent + item.name)
+                    final.push(item)
+                    if (typeof item.items !== 'undefined') {
+                        final = final.concat(this.flattenItems(item.items, level+1))
+                    }
+                })
+            }
+
+            return final
+        },
+
         sortItems(data) {
             if (data.length) {
                 data.sort(function(a, b) {

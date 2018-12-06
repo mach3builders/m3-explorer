@@ -14,7 +14,7 @@
                 <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
                     <ul>
                         <li @click="showAddPopper"><div>{{ settings.text.addItemAction }}</div></li>
-                        <li @click="move"><div>{{ settings.text.moveItemAction }}</div></li>
+                        <li @click="showMovePopper"><div>{{ settings.text.moveItemAction }}</div></li>
                         <li @click="rename"><div>{{ settings.text.renameItemAction }}</div></li>
                         <li @click="removeConfirm">
                             <div>{{ settings.text.removeItemAction }}</div>
@@ -37,6 +37,20 @@
                         </m3-buttons>
                     </div>
                 </m3-popper>
+
+                <m3-popper v-if="!data.static" ref="move-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
+                    <div class="m3-form-inline">
+                        <div class="m3-form-field">
+                            <select ref="move-input">
+                                <option value="-" v-for="collectionOption in collectionOptions" :key="collectionOption.id" v-html="collectionOption.option"></option>
+                            </select>
+                        </div>
+                        <m3-buttons>
+                            <m3-button type="success" icon="check" @button:clicked="move" flat></m3-button>
+                            <m3-button type="danger" icon="times" @button:clicked="hideMovePopper" flat></m3-button>
+                        </m3-buttons>
+                    </div>
+                </m3-popper>
             </div>
         </div>
 
@@ -52,6 +66,7 @@
             <m3-explorer-item v-for="item in dynamicItems"
                 :key="item.id"
                 :collection="dynamicItems"
+                :collectionOptions="collectionOptions"
                 :data="item"
                 :groupId="groupId"
                 :groupIsStatic="groupIsStatic"
@@ -79,6 +94,7 @@ export default {
 
     props: {
         collection: Array,
+        collectionOptions: Array,
         data: Object,
         groupId: Number,
         groupIsStatic: Boolean,
@@ -335,6 +351,32 @@ export default {
             if (popperRef && inputRef) {
                 popperRef.hide()
                 inputRef.value = ''
+            }
+        },
+
+        showMovePopper() {
+            this.focus = true
+            const dispatcherRef = this.$refs['actions-button']
+            const popperRef = this.$refs['move-popper']
+            popperRef.setDispatcher(dispatcherRef)
+            popperRef.show()
+
+            // focus on the input field, but first wait till the dom is updated
+            this.$nextTick(() => {
+                const inputRef = this.$refs['move-input']
+                if (inputRef) {
+                    inputRef.focus()
+                }
+            })
+        },
+
+        hideMovePopper() {
+            const popperRef = this.$refs['move-popper']
+            const inputRef = this.$refs['move-input']
+
+            if (popperRef && inputRef) {
+                popperRef.hide()
+                //inputRef.value = ''
             }
         }
     }
