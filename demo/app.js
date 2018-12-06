@@ -2975,12 +2975,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   created: function created() {
     // listen to events
-    this.$root.eventHub.$on('sort-items', this.sortItems); // sort all initial items
+    this.$root.eventHub.$on('sort-items', this.sortItems);
+    this.$root.eventHub.$on('explorer-item:added', this.addItem); // sort all initial items
 
     this.sortAllItems();
   },
   beforeDestroy: function beforeDestroy() {
     this.$root.eventHub.$off('sort-items', this.sortItems);
+    this.$root.eventHub.$off('explorer-item:added', this.addItem);
   },
   methods: {
     sortItems: function sortItems(data) {
@@ -3035,34 +3037,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         inputRef.value = '';
       }
     },
-    addItem: function addItem() {
+    addItem: function addItem(event, vm, parentData) {
       var _this2 = this;
 
-      var ref = this.$refs['add-input'];
+      var ref = vm ? vm.$refs['add-input'] : this.$refs['add-input'];
 
       if (this.urls.addItem && ref && ref.value.trim()) {
-        // show loader
-        //this.$set(item, 'loading', true)
-        // create form data, so we can catch $_POST with PHP for instance...
-        var formData = new FormData();
-        formData.append('group', this.data.id || 0);
-        formData.append('value', ref.value.trim() || ''); // make request
+        if (!vm || vm && vm.$parent === this) {
+          if (vm) console.log(vm.$parent); // show loader
+          //this.$set(item, 'loading', true)
+          // create form data, so we can catch $_POST with PHP for instance...
 
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
-          _this2.hidePopper();
+          var formData = new FormData();
+          formData.append('group', this.data.id || 0);
+          formData.append('parent', parentData ? parentData.id : 0);
+          formData.append('value', ref.value.trim() || ''); // make request
 
-          if (_this2.data.items.dynamic) {
-            _this2.data.items.dynamic.push(response.data.data);
+          __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.urls.addItem, formData).then(function (response) {
+            _this2.hidePopper();
 
-            _this2.sortItems(_this2.data.items.dynamic);
-          } else {
-            _this2.data.items.push(response.data.data);
+            if (_this2.data.items.dynamic) {
+              if (!parentData) {
+                _this2.data.items.dynamic.push(response.data.data);
 
-            _this2.sortItems(_this2.data.items);
-          }
-        }).catch(function (error) {
-          console.error(error);
-        });
+                _this2.sortItems(_this2.data.items.dynamic);
+              } else {
+                if (!parentData.items) {
+                  _this2.$set(parentData, 'items', []);
+                }
+
+                parentData.items.push(response.data.data);
+
+                _this2.sortItems(parentData.items);
+              }
+            } else {
+              _this2.data.items.push(response.data.data);
+
+              _this2.sortItems(_this2.data.items);
+            }
+          }).catch(function (error) {
+            console.error(error);
+          });
+        }
       }
     }
   }
@@ -3573,7 +3589,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         });
       }
     },
-    add: function add() {},
+    add: function add(vm, event) {
+      this.$root.eventHub.$emit('explorer-item:added', event, this, this.data);
+      this.hideAddPopper();
+    },
     rename: function rename() {
       var _this2 = this;
 
@@ -3653,14 +3672,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$refs['actions-popper'].hide();
     },
     showAddPopper: function showAddPopper() {
+      var _this5 = this;
+
       this.focus = true;
       var dispatcherRef = this.$refs['actions-button'];
       var popperRef = this.$refs['add-popper'];
       popperRef.setDispatcher(dispatcherRef);
-      popperRef.show();
+      popperRef.show(); // focus on the input field, but first wait till the dom is updated
+
+      this.$nextTick(function () {
+        var inputRef = _this5.$refs['add-input'];
+
+        if (inputRef) {
+          inputRef.focus();
+        }
+      });
     },
     hideAddPopper: function hideAddPopper() {
-      this.$refs['add-popper'].hide();
+      var popperRef = this.$refs['add-popper'];
+      var inputRef = this.$refs['add-input'];
+
+      if (popperRef && inputRef) {
+        popperRef.hide();
+        inputRef.value = '';
+      }
     }
   }
 });

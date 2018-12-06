@@ -189,8 +189,9 @@ export default {
             }
         },
 
-        add() {
-
+        add(vm, event) {
+            this.$root.eventHub.$emit('explorer-item:added', event, this, this.data)
+            this.hideAddPopper()
         },
 
         rename() {
@@ -288,10 +289,24 @@ export default {
             const popperRef = this.$refs['add-popper']
             popperRef.setDispatcher(dispatcherRef)
             popperRef.show()
+
+            // focus on the input field, but first wait till the dom is updated
+            this.$nextTick(() => {
+                const inputRef = this.$refs['add-input']
+                if (inputRef) {
+                    inputRef.focus()
+                }
+            })
         },
 
         hideAddPopper() {
-            this.$refs['add-popper'].hide()
+            const popperRef = this.$refs['add-popper']
+            const inputRef = this.$refs['add-input']
+
+            if (popperRef && inputRef) {
+                popperRef.hide()
+                inputRef.value = ''
+            }
         }
     }
 }
