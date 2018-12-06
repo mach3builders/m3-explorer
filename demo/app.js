@@ -3785,6 +3785,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (popperRef && inputRef) {
         popperRef.hide(); //inputRef.value = ''
       }
+    },
+    isOptionSelected: function isOptionSelected(item) {
+      if (this.data.items && this.data.items.includes(item)) {
+        console.log(this.data.items);
+        return true;
+      }
+
+      return false;
     }
   }
 });
@@ -4200,8 +4208,11 @@ var render = function() {
                               ) {
                                 return _c("option", {
                                   key: collectionOption.id,
-                                  attrs: { value: "-" },
                                   domProps: {
+                                    value: collectionOption.id,
+                                    selected: _vm.isOptionSelected(
+                                      collectionOption
+                                    ),
                                     innerHTML: _vm._s(collectionOption.option)
                                   }
                                 })

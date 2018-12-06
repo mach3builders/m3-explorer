@@ -42,7 +42,7 @@
                     <div class="m3-form-inline">
                         <div class="m3-form-field">
                             <select ref="move-input">
-                                <option value="-" v-for="collectionOption in collectionOptions" :key="collectionOption.id" v-html="collectionOption.option"></option>
+                                <option :value="collectionOption.id" v-for="collectionOption in collectionOptions" :key="collectionOption.id" v-html="collectionOption.option" :selected="isOptionSelected(collectionOption)"></option>
                             </select>
                         </div>
                         <m3-buttons>
@@ -378,6 +378,14 @@ export default {
                 popperRef.hide()
                 //inputRef.value = ''
             }
+        },
+
+        isOptionSelected(item) {
+            if (this.data.items && this.data.items.includes(item)) {
+                console.log(this.data.items)
+                return true
+            }
+            return false
         }
     }
 }
