@@ -1694,9 +1694,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     var _this = this;
 
     // listen to events
-    this.$root.eventHub.$on('set-active-item', this.setActiveItem);
-    this.$root.eventHub.$on('set-renaming-item', this.setRenamingItem);
-    this.$root.eventHub.$on('hide-renaming-item-popper', this.hideRenamingItemPopper); // load data
+    this.$root.eventHub.$on('explorer-items-group:sort-items', this.sortItems);
+    this.$root.eventHub.$on('explorer-item:activate', this.setActiveItem);
+    this.$root.eventHub.$on('explorer-item:rename', this.setRenamingItem);
+    this.$root.eventHub.$on('explorer-item:sort', this.sortItems);
+    this.$root.eventHub.$on('explorer-item:hide-renaming-popper', this.hideRenamingItemPopper); // load data
 
     if (this.groupSettings.urls.loadData) {
       __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.groupSettings.urls.loadData).then(function (response) {
@@ -1711,9 +1713,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     }
   },
   beforeDestroy: function beforeDestroy() {
-    this.$root.eventHub.$off('set-active-item', this.setActiveItem);
-    this.$root.eventHub.$off('set-renaming-item', this.setRenamingItem);
-    this.$root.eventHub.$off('hide-renaming-item-popper', this.hideRenamingItemPopper);
+    this.$root.eventHub.$off('explorer-items-group:sort-items', this.sortItems);
+    this.$root.eventHub.$off('explorer-item:activate', this.setActiveItem);
+    this.$root.eventHub.$off('explorer-item:rename', this.setRenamingItem);
+    this.$root.eventHub.$off('explorer-item:sort', this.sortItems);
+    this.$root.eventHub.$off('explorer-item:hide-renaming-popper', this.hideRenamingItemPopper);
   },
   methods: {
     mergeSettings: function mergeSettings() {
@@ -1740,6 +1744,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         text: text,
         urls: urls
       };
+    },
+    sortItems: function sortItems(data) {
+      if (data.length) {
+        data.sort(function (a, b) {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+
+          if (nameA < nameB) {
+            return -1;
+          }
+
+          if (nameA > nameB) {
+            return 1;
+          }
+
+          return 0;
+        });
+      }
+
+      return data;
     },
     initActiveItem: function initActiveItem() {
       for (var a = 0; a < this.data.length; a++) {
@@ -2989,13 +3013,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     }
   },
   created: function created() {
-    // listen to events
-    this.$root.eventHub.$on('sort-items', this.sortItems); // sort all initial items
-
+    // sort all initial items
     this.sortAllItems();
-  },
-  beforeDestroy: function beforeDestroy() {
-    this.$root.eventHub.$off('sort-items', this.sortItems);
   },
   methods: {
     flattenItems: function flattenItems(items, level) {
@@ -3024,29 +3043,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       return final;
     },
-    sortItems: function sortItems(data) {
-      if (data.length) {
-        data.sort(function (a, b) {
-          var nameA = a.name.toUpperCase();
-          var nameB = b.name.toUpperCase();
-
-          if (nameA < nameB) {
-            return -1;
-          }
-
-          if (nameA > nameB) {
-            return 1;
-          }
-
-          return 0;
-        });
-      }
-
-      return data;
-    },
     sortAllItems: function sortAllItems() {
-      if (this.staticItems.length) this.sortItems(this.staticItems);
-      if (this.dynamicItems.length) this.sortItems(this.dynamicItems);
+      if (this.staticItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.staticItems);
+      if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.dynamicItems);
     },
     showPopper: function showPopper(vm, event) {
       var _this2 = this;
@@ -3093,11 +3092,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           if (_this3.data.items.dynamic) {
             _this3.data.items.dynamic.push(response.data.data);
 
-            _this3.sortItems(_this3.data.items.dynamic);
+            _this3.$root.eventHub.$emit('explorer-items-group:sort-items', _this3.data.items.dynamic);
           } else {
             _this3.data.items.push(response.data.data);
 
-            _this3.sortItems(_this3.data.items);
+            _this3.$root.eventHub.$emit('explorer-items-group:sort-items', _this3.data.items);
           }
 
           _this3.hidePopper();
@@ -3596,7 +3595,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     this.$options.components.M3ExplorerItem = __webpack_require__(13);
   },
   created: function created() {
-    this.$root.eventHub.$on('document:clicked', this.renamed);
+    this.$root.eventHub.$on('document:clicked', this.renamed); // sort all initial items
+
+    this.sortAllItems();
   },
   beforeDestroy: function beforeDestroy() {
     this.$root.eventHub.$off('document.clicked', this.renamed);
@@ -3607,6 +3608,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     toggleItems: function toggleItems() {
       this.itemsOpen = !this.itemsOpen;
+    },
+    sortAllItems: function sortAllItems() {
+      if (this.staticItems.length) this.$root.eventHub.$emit('explorer-item:sort', this.staticItems);
+      if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-item:sort', this.dynamicItems);
     },
     actionsPopperShown: function actionsPopperShown() {
       this.focus = true;
@@ -3647,7 +3652,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
           _this.settings.events.getItem(response.data);
 
-          _this.$root.eventHub.$emit('set-active-item', _this.data);
+          _this.$root.eventHub.$emit('explorer-item:activate', _this.data);
         }).catch(function (error) {
           console.error(error);
         });
@@ -3677,6 +3682,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               _this2.itemsOpen = true;
             });
           }
+
+          _this2.$root.eventHub.$emit('explorer-item:sort', _this2.data.items);
         }).catch(function (error) {
           console.error(error);
         });
@@ -3688,7 +3695,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var _this3 = this;
 
       this.renaming = true;
-      this.$root.eventHub.$emit('set-renaming-item', this); // focus on the input field, but first wait till the dom is updated
+      this.$root.eventHub.$emit('explorer-item:rename', this);
+      this.$root.eventHub.$emit('explorer-item:sort', this.data.items); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
         var ref = _this3.$refs['input'];
@@ -3715,7 +3723,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this4.loading = false;
             _this4.renaming = false;
 
-            _this4.$root.eventHub.$emit('sort-items', _this4.collection);
+            _this4.$root.eventHub.$emit('explorer-items-group:sort-items', _this4.collection);
           }).catch(function (error) {
             console.error(error);
           });
@@ -3757,7 +3765,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var ref = this.$refs['actions-popper'];
       ref.setDispatcher(vm);
       ref.show();
-      this.$root.eventHub.$emit('hide-renaming-item-popper');
+      this.$root.eventHub.$emit('explorer-item:hide-renaming-popper');
     },
     hideActionsPopper: function hideActionsPopper() {
       this.$refs['actions-popper'].hide();

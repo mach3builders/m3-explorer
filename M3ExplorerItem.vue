@@ -166,6 +166,9 @@ export default {
 
     created() {
         this.$root.eventHub.$on('document:clicked', this.renamed)
+
+        // sort all initial items
+        this.sortAllItems()
     },
 
     beforeDestroy() {
@@ -179,6 +182,11 @@ export default {
 
         toggleItems() {
             this.itemsOpen = !this.itemsOpen
+        },
+
+        sortAllItems() {
+            if (this.staticItems.length) this.$root.eventHub.$emit('explorer-item:sort', this.staticItems)
+            if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-item:sort', this.dynamicItems)
         },
 
         actionsPopperShown() {
@@ -224,7 +232,7 @@ export default {
                     this.$set(this.data, 'active', true)
                     this.settings.events.getItem(response.data)
 
-                    this.$root.eventHub.$emit('set-active-item', this.data)
+                    this.$root.eventHub.$emit('explorer-item:activate', this.data)
                 })
                 .catch((error) => {
                     console.error(error)
@@ -255,6 +263,7 @@ export default {
                             this.itemsOpen = true
                         })
                     }
+                    this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
                 })
                 .catch((error) => {
                     console.error(error)
@@ -270,7 +279,8 @@ export default {
 
         rename() {
             this.renaming = true
-            this.$root.eventHub.$emit('set-renaming-item', this)
+            this.$root.eventHub.$emit('explorer-item:rename', this)
+            this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
 
             // focus on the input field, but first wait till the dom is updated
             this.$nextTick(() => {
@@ -300,7 +310,7 @@ export default {
                     .then((response) => {
                         this.loading = false
                         this.renaming = false
-                        this.$root.eventHub.$emit('sort-items', this.collection)
+                        this.$root.eventHub.$emit('explorer-items-group:sort-items', this.collection)
                     })
                     .catch((error) => {
                         console.error(error)
@@ -350,7 +360,7 @@ export default {
             ref.setDispatcher(vm)
             ref.show()
 
-            this.$root.eventHub.$emit('hide-renaming-item-popper')
+            this.$root.eventHub.$emit('explorer-item:hide-renaming-popper')
         },
 
         hideActionsPopper() {

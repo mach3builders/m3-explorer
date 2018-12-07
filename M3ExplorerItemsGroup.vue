@@ -75,15 +75,8 @@ export default {
     },
 
     created() {
-        // listen to events
-        this.$root.eventHub.$on('sort-items', this.sortItems)
-
         // sort all initial items
         this.sortAllItems()
-    },
-
-    beforeDestroy() {
-        this.$root.eventHub.$off('sort-items', this.sortItems)
     },
 
     methods: {
@@ -110,29 +103,9 @@ export default {
             return final
         },
 
-        sortItems(data) {
-            if (data.length) {
-                data.sort(function(a, b) {
-                    const nameA = a.name.toUpperCase()
-                    const nameB = b.name.toUpperCase()
-
-                    if (nameA < nameB) {
-                        return -1
-                    }
-                    if (nameA > nameB) {
-                        return 1
-                    }
-
-                    return 0
-                });
-            }
-
-            return data
-        },
-
         sortAllItems() {
-            if (this.staticItems.length) this.sortItems(this.staticItems)
-            if (this.dynamicItems.length) this.sortItems(this.dynamicItems)
+            if (this.staticItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.staticItems)
+            if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.dynamicItems)
         },
 
         showPopper(vm, event) {
@@ -180,10 +153,10 @@ export default {
                 .then((response) => {
                     if (this.data.items.dynamic) {
                         this.data.items.dynamic.push(response.data.data)
-                        this.sortItems(this.data.items.dynamic)
+                        this.$root.eventHub.$emit('explorer-items-group:sort-items', this.data.items.dynamic)
                     } else {
                         this.data.items.push(response.data.data)
-                        this.sortItems(this.data.items)
+                        this.$root.eventHub.$emit('explorer-items-group:sort-items', this.data.items)
                     }
 
                     this.hidePopper()

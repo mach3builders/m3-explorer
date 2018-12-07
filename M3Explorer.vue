@@ -31,9 +31,11 @@ export default {
 
     created() {
         // listen to events
-        this.$root.eventHub.$on('set-active-item', this.setActiveItem)
-        this.$root.eventHub.$on('set-renaming-item', this.setRenamingItem)
-        this.$root.eventHub.$on('hide-renaming-item-popper', this.hideRenamingItemPopper)
+        this.$root.eventHub.$on('explorer-items-group:sort-items', this.sortItems)
+        this.$root.eventHub.$on('explorer-item:activate', this.setActiveItem)
+        this.$root.eventHub.$on('explorer-item:rename', this.setRenamingItem)
+        this.$root.eventHub.$on('explorer-item:sort', this.sortItems)
+        this.$root.eventHub.$on('explorer-item:hide-renaming-popper', this.hideRenamingItemPopper)
 
         // load data
         if (this.groupSettings.urls.loadData) {
@@ -52,9 +54,11 @@ export default {
     },
 
     beforeDestroy() {
-        this.$root.eventHub.$off('set-active-item', this.setActiveItem)
-        this.$root.eventHub.$off('set-renaming-item', this.setRenamingItem)
-        this.$root.eventHub.$off('hide-renaming-item-popper', this.hideRenamingItemPopper)
+        this.$root.eventHub.$off('explorer-items-group:sort-items', this.sortItems)
+        this.$root.eventHub.$off('explorer-item:activate', this.setActiveItem)
+        this.$root.eventHub.$off('explorer-item:rename', this.setRenamingItem)
+        this.$root.eventHub.$off('explorer-item:sort', this.sortItems)
+        this.$root.eventHub.$off('explorer-item:hide-renaming-popper', this.hideRenamingItemPopper)
     },
 
     methods: {
@@ -86,6 +90,26 @@ export default {
                 text: text,
                 urls: urls,
             }
+        },
+
+        sortItems(data) {
+            if (data.length) {
+                data.sort(function(a, b) {
+                    const nameA = a.name.toUpperCase()
+                    const nameB = b.name.toUpperCase()
+
+                    if (nameA < nameB) {
+                        return -1
+                    }
+                    if (nameA > nameB) {
+                        return 1
+                    }
+
+                    return 0
+                });
+            }
+
+            return data
         },
 
         initActiveItem() {
@@ -130,13 +154,3 @@ export default {
     }
 }
 </script>
-
-import M3Button from '@mach3builders/m3-components/M3Button'
-import M3Collapse from '@mach3builders/m3-components/M3Collapse'
-
-export default {
-    components: {
-        M3Button,
-        M3Collapse,
-    }
-}
