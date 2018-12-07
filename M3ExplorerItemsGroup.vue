@@ -32,6 +32,7 @@
                     :key="item.id"
                     :collection="dynamicItems"
                     :data="item"
+                    :group="this"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
                     :urls="urls"
@@ -144,7 +145,6 @@ export default {
             const ref = vm ? vm.$refs['add-input'] : this.$refs['add-input']
             if (this.urls.addItem && ref && ref.value.trim()) {
                 if (!vm || (vm && vm.$parent === this)) {
-               if (vm) console.log(vm.$parent)
                     // show loader
                     //this.$set(item, 'loading', true)
 

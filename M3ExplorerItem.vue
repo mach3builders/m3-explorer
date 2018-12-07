@@ -82,6 +82,7 @@ export default {
         collection: Array,
         data: Object,
         events: Object,
+        group: '',
         groupId: Number,
         groupIsStatic: Boolean,
         urls: Object,
@@ -190,6 +191,7 @@ export default {
         },
 
         add(vm, event) {
+            console.log(this.group)
             this.$root.eventHub.$emit('explorer-item:added', event, this, this.data)
             this.hideAddPopper()
         },

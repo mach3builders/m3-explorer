@@ -2948,6 +2948,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
@@ -3044,10 +3045,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       if (this.urls.addItem && ref && ref.value.trim()) {
         if (!vm || vm && vm.$parent === this) {
-          if (vm) console.log(vm.$parent); // show loader
+          // show loader
           //this.$set(item, 'loading', true)
           // create form data, so we can catch $_POST with PHP for instance...
-
           var formData = new FormData();
           formData.append('group', this.data.id || 0);
           formData.append('parent', parentData ? parentData.id : 0);
@@ -3494,6 +3494,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     collection: Array,
     data: Object,
     events: Object,
+    group: '',
     groupId: Number,
     groupIsStatic: Boolean,
     urls: Object
@@ -3590,6 +3591,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     add: function add(vm, event) {
+      console.log(this.group);
       this.$root.eventHub.$emit('explorer-item:added', event, this, this.data);
       this.hideAddPopper();
     },
@@ -4254,6 +4256,7 @@ var render = function() {
                     attrs: {
                       collection: _vm.dynamicItems,
                       data: item,
+                      group: this,
                       groupId: _vm.data.id,
                       groupIsStatic: _vm.data.static,
                       urls: _vm.urls,
