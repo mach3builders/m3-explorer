@@ -11,12 +11,13 @@
 
                 <m3-button type="transparent" icon="ellipsis-h" ref="actions-button" v-if="actionsAllowed" @button:clicked="showActionsPopper" flat></m3-button>
 
-                <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
+                <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="actionsPopperShown" @popper:hidden="actionsPopperHidden">
                     <ul>
-                        <li @click="showAddPopper"><div>Add folder</div></li>
-                        <li @click="rename"><div>Rename</div></li>
+                        <li @click="showAddPopper"><div>{{ settings.text.addItemAction }}</div></li>
+                        <li @click="showMovePopper"><div>{{ settings.text.moveItemAction }}</div></li>
+                        <li @click="rename"><div>{{ settings.text.renameItemAction }}</div></li>
                         <li @click="removeConfirm">
-                            <div>Delete</div>
+                            <div>{{ settings.text.removeItemAction }}</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
                                     <m3-button type="danger" icon="times" @button:clicked="removeCancelled" flat></m3-button>
@@ -27,12 +28,32 @@
                     </ul>
                 </m3-popper>
 
-                <m3-popper v-if="!data.static" ref="add-popper" @popper:shown="focusItem" @popper:hidden="blurItem">
+                <m3-popper v-if="!data.static" ref="add-popper" @popper:shown="addPopperShown" @popper:hidden="addPopperHidden">
                     <div class="m3-form-inline">
                         <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="add" /></div>
                         <m3-buttons>
                             <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
                             <m3-button type="danger" icon="times" @button:clicked="hideAddPopper" flat></m3-button>
+                        </m3-buttons>
+                    </div>
+                </m3-popper>
+
+                <m3-popper v-if="!data.static" ref="move-popper" @popper:shown="movePopperShown" @popper:hidden="movePopperHidden">
+                    <div class="m3-form-inline">
+                        <div class="m3-form-field">
+                            <select ref="move-input">
+                                <option value="0" selected>{{ settings.text.moveItemSelectOption }}</option>
+                                <option value="-"
+                                    v-for="moveOption in moveOptions"
+                                    :key="moveOption.id"
+                                    v-html="moveOption.option"
+                                    :disabled="isOptionDisabled(moveOption)">
+                                </option>
+                            </select>
+                        </div>
+                        <m3-buttons>
+                            <m3-button type="success" icon="check" @button:clicked="move" flat></m3-button>
+                            <m3-button type="danger" icon="times" @button:clicked="hideMovePopper" flat></m3-button>
                         </m3-buttons>
                     </div>
                 </m3-popper>
@@ -46,17 +67,17 @@
                 :data="item"
                 :groupId="groupId"
                 :groupIsStatic="true"
-                :urls="urls"
-                :events="events" />
+                :settings="settings" />
 
             <m3-explorer-item v-for="item in dynamicItems"
                 :key="item.id"
                 :collection="dynamicItems"
+                :moveOptions="moveOptions"
                 :data="item"
                 :groupId="groupId"
                 :groupIsStatic="groupIsStatic"
-                :urls="urls"
-                :events="events" />
+                :parentData="data"
+                :settings="settings" />
         </m3-collapse>
     </div>
 </template>
@@ -79,13 +100,14 @@ export default {
     },
 
     props: {
-        collection: Array,
         data: Object,
-        events: Object,
-        group: '',
+        collection: Array,
         groupId: Number,
         groupIsStatic: Boolean,
-        urls: Object,
+        level: Number,
+        moveOptions: Array,
+        parentData: Object,
+        settings: Object,
     },
 
     data() {
@@ -93,8 +115,10 @@ export default {
             focus: false,
             itemsOpen: false,
             loading: false,
-            renaming: false,
+            optionDisabled: false,
+            optionName: null,
             removeConfirmClass: false,
+            renaming: false,
         }
     },
 
@@ -157,21 +181,39 @@ export default {
             this.itemsOpen = !this.itemsOpen
         },
 
-        blurItem() {
+        actionsPopperShown() {
+            this.focus = true
+        },
+
+        actionsPopperHidden() {
             this.focus = false
         },
 
-        focusItem() {
+        addPopperShown() {
             this.focus = true
+        },
+
+        addPopperHidden() {
+            this.focus = false
+        },
+
+        movePopperShown() {
+            this.focus = true
+            this.optionDisabled = true
+        },
+
+        movePopperHidden() {
+            this.focus = false
+            this.optionDisabled = false
         },
 
         click() {
             if (this.data.active) return
 
-            if (this.urls.loadItemData) {
+            if (this.settings.urls.getItem) {
                 this.loading = true
 
-                axios.get(this.urls.loadItemData, {
+                axios.get(this.settings.urls.getItem, {
                     params: {
                         group_id: this.groupId || 0,
                         id: this.data.id || 0,
@@ -180,7 +222,7 @@ export default {
                 .then((response) => {
                     this.loading = false
                     this.$set(this.data, 'active', true)
-                    this.events.loadItemData(response.data)
+                    this.settings.events.getItem(response.data)
 
                     this.$root.eventHub.$emit('set-active-item', this.data)
                 })
@@ -190,10 +232,40 @@ export default {
             }
         },
 
-        add(vm, event) {
-            console.log(this.group)
-            this.$root.eventHub.$emit('explorer-item:added', event, this, this.data)
-            this.hideAddPopper()
+        add() {
+            const ref = this.$refs['add-input']
+
+            if (this.settings.urls.addItem && ref && ref.value.trim()) {
+                const formData = new FormData()
+                formData.append('group', this.groupId || 0)
+                formData.append('parent', this.data.id || 0)
+                formData.append('value', ref.value.trim() || '')
+
+                // make request
+                axios.post(this.settings.urls.addItem, formData)
+                .then((response) => {
+                    if (!this.data.items) {
+                        this.$set(this.data, 'items', [])
+                    }
+                    this.data.items.push(response.data.data)
+
+                    // open when closed
+                    if (!this.itemsOpen) {
+                        this.$nextTick(() => {
+                            this.itemsOpen = true
+                        })
+                    }
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
+                this.hideAddPopper()
+            }
+        },
+
+        move() {
+
         },
 
         rename() {
@@ -215,7 +287,7 @@ export default {
 
         renamed() {
             if (this.renaming && this.data.name.trim()) {
-                if (this.urls.renameItem) {
+                if (this.settings.urls.renameItem) {
                     this.loading = true
 
                     // create form data, so we can catch $_POST with PHP for instance...
@@ -224,7 +296,7 @@ export default {
                     formData.append('group_id', this.groupId || 0)
                     formData.append('value', this.data.name.trim() || '')
 
-                    axios.post(this.urls.renameItem, formData)
+                    axios.post(this.settings.urls.renameItem, formData)
                     .then((response) => {
                         this.loading = false
                         this.renaming = false
@@ -249,7 +321,7 @@ export default {
         },
 
         remove() {
-            if (this.urls.removeItem) {
+            if (this.settings.urls.removeItem) {
                 this.loading = true
 
                 // create form data, so we can catch $_POST with PHP for instance...
@@ -257,7 +329,7 @@ export default {
                 formData.append('id', this.data.id || 0)
                 formData.append('group_id', this.groupId || 0)
 
-                axios.post(this.urls.removeItem, formData)
+                axios.post(this.settings.urls.removeItem, formData)
                 .then((response) => {
                     this.collection.splice(this.collection.indexOf(this.data), 1)
                     this.loading = false
@@ -309,6 +381,79 @@ export default {
                 popperRef.hide()
                 inputRef.value = ''
             }
+        },
+
+        showMovePopper() {
+            // convert move options
+            //this.convertMoveOptions(this.moveOptions)
+
+            this.focus = true
+            const dispatcherRef = this.$refs['actions-button']
+            const popperRef = this.$refs['move-popper']
+            popperRef.setDispatcher(dispatcherRef)
+            popperRef.show()
+
+            // focus on the input field, but first wait till the dom is updated
+            this.$nextTick(() => {
+                const inputRef = this.$refs['move-input']
+                if (inputRef) {
+                    inputRef.focus()
+                }
+            })
+        },
+
+        hideMovePopper() {
+            const popperRef = this.$refs['move-popper']
+            const inputRef = this.$refs['move-input']
+
+            if (popperRef && inputRef) {
+                popperRef.hide()
+            }
+        },
+
+        isOptionDisabled(option) {
+            if (this.isOptionThisItem(option)) {
+                return true
+            }
+
+            if (this.isOptionParentItem(option)) {
+                return true
+            }
+
+            if (this.isOptionChildItem(option)) {
+                return true
+            }
+
+            return false
+        },
+
+        isOptionThisItem(option) {
+            return option === this.data
+        },
+
+        isOptionParentItem(option) {
+            return option === this.parentData
+        },
+
+        isOptionChildItem(option, items) {
+            if (!items) {
+                items = this.data.items || []
+            }
+
+            if (items.length) {
+                for (let i=0; i<items.length; i++) {
+                    const item = items[i]
+                    if (option === item) {
+                       return true
+                    } else {
+                        if (item.items && item.items.length) {
+                            return this.isOptionChildItem(option, item.items)
+                        }
+                    }
+                }
+            }
+
+            return false
         }
     }
 }

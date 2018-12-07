@@ -73,6 +73,7 @@ export default {
                 addItemAction: 'Add',
                 renameItemAction: 'Rename',
                 moveItemAction: 'Move',
+                moveItemSelectOption: 'Select an option',
                 removeItemAction: 'Remove',
             }, this.settings.text)
 

@@ -18,6 +18,7 @@ export default {
                 text: {
                     addItemAction: 'Add folder',
                     moveItemAction: 'Move to',
+                    moveItemSelectOption: 'Select a folder',
                     renameItemAction: 'Rename',
                     removeItemAction: 'Delete',
                 },

@@ -30,9 +30,8 @@
                 <m3-explorer-item v-for="item in dynamicItems"
                     :key="item.id"
                     :collection="dynamicItems"
-                    :collectionOptions="collectionOptions"
+                    :moveOptions="moveOptions"
                     :data="item"
-                    :group="this"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
                     :settings="settings" />
@@ -70,7 +69,7 @@ export default {
             return this.data.items.length ? this.data.items : (this.data.items.dynamic || [])
         },
 
-        collectionOptions() {
+        moveOptions() {
             return !this.data.static ? this.flattenItems(this.dynamicItems) : []
         }
     },
@@ -164,45 +163,34 @@ export default {
             }
         },
 
-        addItem(event, vm, parentData) {
-            const ref = vm ? vm.$refs['add-input'] : this.$refs['add-input']
-            if (this.urls.addItem && ref && ref.value.trim()) {
-                if (!vm || (vm && vm.$parent === this)) {
-                    // show loader
-                    //this.$set(item, 'loading', true)
+        addItem() {
+            const ref = this.$refs['add-input']
 
-                    // create form data, so we can catch $_POST with PHP for instance...
-                    const formData = new FormData()
-                    formData.append('group', this.data.id || 0)
-                    formData.append('parent', parentData ? parentData.id : 0)
-                    formData.append('value', ref.value.trim() || '')
+            if (this.settings.urls.addItem && ref && ref.value.trim()) {
+                // show loader
+                //this.$set(item, 'loading', true)
 
-                    // make request
-                    axios.post(this.urls.addItem, formData)
-                    .then((response) => {
-                        this.hidePopper()
+                // create form data, so we can catch $_POST with PHP for instance...
+                const formData = new FormData()
+                formData.append('group', this.data.id || 0)
+                formData.append('value', ref.value.trim() || '')
 
-                        if (this.data.items.dynamic) {
-                            if (!parentData) {
-                                this.data.items.dynamic.push(response.data.data)
-                                this.sortItems(this.data.items.dynamic)
-                            } else {
-                                if (!parentData.items) {
-                                    this.$set(parentData, 'items', [])
-                                }
+                // make request
+                axios.post(this.settings.urls.addItem, formData)
+                .then((response) => {
+                    if (this.data.items.dynamic) {
+                        this.data.items.dynamic.push(response.data.data)
+                        this.sortItems(this.data.items.dynamic)
+                    } else {
+                        this.data.items.push(response.data.data)
+                        this.sortItems(this.data.items)
+                    }
 
-                                parentData.items.push(response.data.data)
-                                this.sortItems(parentData.items)
-                            }
-                        } else {
-                            this.data.items.push(response.data.data)
-                            this.sortItems(this.data.items)
-                        }
-                    })
-                    .catch((error) => {
-                        console.error(error)
-                    })
-                }
+                    this.hidePopper()
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
             }
         },
     }
