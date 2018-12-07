@@ -23,20 +23,19 @@
                     :data="item"
                     :groupId="data.id"
                     :groupIsStatic="true"
-                    :urls="urls"
-                    :events="events" />
+                    :settings="settings" />
             </div>
 
             <div class="m3-explorer-items" v-if="dynamicItems.length">
                 <m3-explorer-item v-for="item in dynamicItems"
                     :key="item.id"
                     :collection="dynamicItems"
+                    :collectionOptions="collectionOptions"
                     :data="item"
                     :group="this"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
-                    :urls="urls"
-                    :events="events" />
+                    :settings="settings" />
             </div>
         </div>
     </div>
@@ -59,8 +58,7 @@ export default {
 
     props: {
         data: Object,
-        events: Object,
-        urls: Object,
+        settings: Object,
     },
 
     computed: {
@@ -70,13 +68,16 @@ export default {
 
         dynamicItems() {
             return this.data.items.length ? this.data.items : (this.data.items.dynamic || [])
+        },
+
+        collectionOptions() {
+            return !this.data.static ? this.flattenItems(this.dynamicItems) : []
         }
     },
 
     created() {
         // listen to events
         this.$root.eventHub.$on('sort-items', this.sortItems)
-        this.$root.eventHub.$on('explorer-item:added', this.addItem)
 
         // sort all initial items
         this.sortAllItems()
@@ -84,10 +85,32 @@ export default {
 
     beforeDestroy() {
         this.$root.eventHub.$off('sort-items', this.sortItems)
-        this.$root.eventHub.$off('explorer-item:added', this.addItem)
     },
 
     methods: {
+        flattenItems(items, level) {
+            let final = []
+            level = level || 0
+
+            if (items && items.length && !items.static) {
+                let indent = ''
+
+                for (let i=0; i<level; i++) {
+                    indent += '&nbsp;&nbsp;&nbsp;';
+                }
+
+                items.forEach((item, index) => {
+                    this.$set(item, 'option', indent + item.name)
+                    final.push(item)
+                    if (typeof item.items !== 'undefined') {
+                        final = final.concat(this.flattenItems(item.items, level+1))
+                    }
+                })
+            }
+
+            return final
+        },
+
         sortItems(data) {
             if (data.length) {
                 data.sort(function(a, b) {

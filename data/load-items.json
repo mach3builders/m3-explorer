@@ -4,7 +4,15 @@
             { "id": 1, "icon": "home", "name": "Home", "active": true},
             { "id": 2, "icon": "recycle", "name": "Used" }
         ], "dynamic": [
-            { "id": 1, "name": "Wedding" },
+            { "id": 1, "name": "Wedding", "items": [
+                { "id": 10, "name": "Iconmonstr" },
+                { "id": 20, "name": "Fontawesome", "items": [
+                    { "id": 30, "name": "Solid" },
+                    { "id": 40, "name": "Regular" },
+                    { "id": 50, "name": "Light" },
+                    { "id": 60, "name": "Brands" }
+                ]}
+            ]},
             { "id": 2, "name": "Business" }
         ]}
     },

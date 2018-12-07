@@ -249,23 +249,34 @@
   display: flex;
 }
 
-.m3-form-field input {
+.m3-form-field {
+  min-width: 9rem;
+}
+
+.m3-form-field input,
+.m3-form-field select {
   background-color: #ffffff;
   border: 1px solid #dee2e6;
   border-radius: 3px;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   font-family: Helvetica, Arial, sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   height: 2rem;
   padding: 0 0.5rem;
   -webkit-transition: border-color 200ms;
   transition: border-color 200ms;
+  width: 100%;
 }
 
-.m3-form-field input:focus {
+.m3-form-field input:focus,
+.m3-form-field select:focus {
   border-color: #b7c0cd;
   outline: 0;
+}
+
+.m3-form-field select {
+  padding: 0;
 }
 
 .m3-icon {
@@ -278,6 +289,10 @@
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 .m3-icon > img {
