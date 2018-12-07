@@ -1599,6 +1599,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           loadData: 'data/load-items.json',
           getItem: 'data/get-item.php',
           addItem: 'data/add-item.php',
+          moveItem: 'data/move-item.php',
           removeItem: 'data/remove-item.php',
           renameItem: 'data/rename-item.php'
         }
@@ -3690,7 +3691,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.hideAddPopper();
       }
     },
-    move: function move() {},
+    move: function move() {
+      var ref = this.$refs['move-input'];
+      var value = parseInt(ref.value);
+
+      if (this.settings.urls.moveItem && ref && value) {
+        var formData = new FormData();
+        formData.append('group', this.groupId || 0);
+        formData.append('parent', value || 0);
+        formData.append('id', this.data.id); // make request
+
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.moveItem, formData).then(function (response) {// if (!this.data.items) {
+          //     this.$set(this.data, 'items', [])
+          // }
+          // this.data.items.push(response.data.data)
+          // // open when closed
+          // if (!this.itemsOpen) {
+          //     this.$nextTick(() => {
+          //         this.itemsOpen = true
+          //     })
+          // }
+          // this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
+        }).catch(function (error) {
+          console.error(error);
+        });
+        this.hideMovePopper();
+      }
+    },
     rename: function rename() {
       var _this3 = this;
 
@@ -4292,10 +4319,10 @@ var render = function() {
                                   return _c("option", {
                                     key: moveOption.id,
                                     attrs: {
-                                      value: "-",
                                       disabled: _vm.isOptionDisabled(moveOption)
                                     },
                                     domProps: {
+                                      value: moveOption.id,
                                       innerHTML: _vm._s(moveOption.option)
                                     }
                                   })

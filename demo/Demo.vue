@@ -26,6 +26,7 @@ export default {
                     loadData: 'data/load-items.json',
                     getItem: 'data/get-item.php',
                     addItem: 'data/add-item.php',
+                    moveItem: 'data/move-item.php',
                     removeItem: 'data/remove-item.php',
                     renameItem: 'data/rename-item.php'
                 }

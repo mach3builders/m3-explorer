@@ -43,7 +43,7 @@
                         <div class="m3-form-field">
                             <select ref="move-input">
                                 <option value="0" selected>{{ settings.text.moveItemSelectOption }}</option>
-                                <option value="-"
+                                <option :value="moveOption.id"
                                     v-for="moveOption in moveOptions"
                                     :key="moveOption.id"
                                     v-html="moveOption.option"
@@ -274,7 +274,38 @@ export default {
         },
 
         move() {
+            const ref = this.$refs['move-input']
+            const value = parseInt(ref.value)
 
+            if (this.settings.urls.moveItem && ref && value) {
+                const formData = new FormData()
+                formData.append('group', this.groupId || 0)
+                formData.append('parent', value || 0)
+                formData.append('id', this.data.id)
+
+                // make request
+                axios.post(this.settings.urls.moveItem, formData)
+                .then((response) => {
+
+                    // if (!this.data.items) {
+                    //     this.$set(this.data, 'items', [])
+                    // }
+                    // this.data.items.push(response.data.data)
+
+                    // // open when closed
+                    // if (!this.itemsOpen) {
+                    //     this.$nextTick(() => {
+                    //         this.itemsOpen = true
+                    //     })
+                    // }
+                    // this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
+                this.hideMovePopper()
+            }
         },
 
         rename() {
