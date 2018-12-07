@@ -452,12 +452,13 @@ export default {
 
             if (items.length) {
                 for (let i=0; i<items.length; i++) {
-                    const item = items[i]
+                    let item = items[i]
                     if (option === item) {
                        return true
                     } else {
                         if (item.items && item.items.length) {
-                            return this.isOptionChildItem(option, item.items)
+                            let tmp = this.isOptionChildItem(option, item.items)
+                            if (tmp) return true
                         }
                     }
                 }

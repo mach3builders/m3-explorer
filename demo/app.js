@@ -3857,7 +3857,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return true;
           } else {
             if (item.items && item.items.length) {
-              return this.isOptionChildItem(option, item.items);
+              var tmp = this.isOptionChildItem(option, item.items);
+              if (tmp) return true;
             }
           }
         }
