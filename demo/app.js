@@ -1592,6 +1592,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           addItemAction: 'Add folder',
           moveItemAction: 'Move to',
           moveItemSelectOption: 'Select a folder',
+          moveItemGroupOption: 'Group folder',
           renameItemAction: 'Rename',
           removeItemAction: 'Delete'
         },
@@ -1734,7 +1735,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         addItemAction: 'Add',
         renameItemAction: 'Rename',
         moveItemAction: 'Move',
-        moveItemSelectOption: 'Select an option',
+        moveItemSelectOption: 'Select an item',
+        moveItemGroupOption: 'Group item',
         removeItemAction: 'Remove'
       }, this.settings.text);
       Object.assign(urls, {
@@ -2986,6 +2988,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
@@ -3522,6 +3525,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 
 
@@ -3540,6 +3546,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: Object,
     collection: Array,
     groupId: Number,
+    groupData: Array,
     groupIsStatic: Boolean,
     level: Number,
     moveOptions: Array,
@@ -3706,11 +3713,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.moveItem, formData).then(function (response) {
           if (!_this3.selectedOption.items) {
             _this3.$set(_this3.selectedOption, 'items', []);
-          }
+          } // move, delete, sort
+
 
           _this3.selectedOption.items.push(_this3.data);
 
-          delete _this3.data;
+          _this3.collection.splice(_this3.collection.indexOf(_this3.data), 1);
 
           _this3.$root.eventHub.$emit('explorer-item:sort', _this3.selectedOption.items);
         }).catch(function (error) {
@@ -4342,6 +4350,18 @@ var render = function() {
                                   ]
                                 ),
                                 _vm._v(" "),
+                                _c(
+                                  "option",
+                                  { domProps: { value: _vm.groupData } },
+                                  [
+                                    _vm._v(
+                                      _vm._s(
+                                        _vm.settings.text.moveItemGroupOption
+                                      )
+                                    )
+                                  ]
+                                ),
+                                _vm._v(" "),
                                 _vm._l(_vm.moveOptions, function(moveOption) {
                                   return _c("option", {
                                     key: moveOption.id,
@@ -4406,6 +4426,7 @@ var render = function() {
                   attrs: {
                     collection: _vm.staticItems,
                     data: item,
+                    groupData: _vm.groupData,
                     groupId: _vm.groupId,
                     groupIsStatic: true,
                     settings: _vm.settings
@@ -4420,6 +4441,7 @@ var render = function() {
                     collection: _vm.dynamicItems,
                     moveOptions: _vm.moveOptions,
                     data: item,
+                    groupData: _vm.groupData,
                     groupId: _vm.groupId,
                     groupIsStatic: _vm.groupIsStatic,
                     parentData: _vm.data,
@@ -4568,6 +4590,7 @@ var render = function() {
                       collection: _vm.dynamicItems,
                       moveOptions: _vm.moveOptions,
                       data: item,
+                      groupData: _vm.dynamicItems,
                       groupId: _vm.data.id,
                       groupIsStatic: _vm.data.static,
                       settings: _vm.settings

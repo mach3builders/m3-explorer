@@ -19,6 +19,7 @@ export default {
                     addItemAction: 'Add folder',
                     moveItemAction: 'Move to',
                     moveItemSelectOption: 'Select a folder',
+                    moveItemGroupOption: 'Group folder',
                     renameItemAction: 'Rename',
                     removeItemAction: 'Delete',
                 },

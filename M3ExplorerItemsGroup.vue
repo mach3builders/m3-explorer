@@ -32,6 +32,7 @@
                     :collection="dynamicItems"
                     :moveOptions="moveOptions"
                     :data="item"
+                    :groupData="dynamicItems"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
                     :settings="settings" />

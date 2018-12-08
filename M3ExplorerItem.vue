@@ -43,6 +43,7 @@
                         <div class="m3-form-field">
                             <select ref="move-input" v-model="selectedOption">
                                 <option value="" disabled>{{ settings.text.moveItemSelectOption }}</option>
+                                <option :value="groupData">{{ settings.text.moveItemGroupOption }}</option>
                                 <option :value="moveOption"
                                     v-for="moveOption in moveOptions"
                                     :key="moveOption.id"
@@ -65,6 +66,7 @@
                 :key="item.id"
                 :collection="staticItems"
                 :data="item"
+                :groupData="groupData"
                 :groupId="groupId"
                 :groupIsStatic="true"
                 :settings="settings" />
@@ -74,6 +76,7 @@
                 :collection="dynamicItems"
                 :moveOptions="moveOptions"
                 :data="item"
+                :groupData="groupData"
                 :groupId="groupId"
                 :groupIsStatic="groupIsStatic"
                 :parentData="data"
@@ -103,6 +106,7 @@ export default {
         data: Object,
         collection: Array,
         groupId: Number,
+        groupData: Array,
         groupIsStatic: Boolean,
         level: Number,
         moveOptions: Array,
@@ -290,8 +294,9 @@ export default {
                         this.$set(this.selectedOption, 'items', [])
                     }
 
+                    // move, delete, sort
                     this.selectedOption.items.push(this.data)
-                    delete this.data
+                    this.collection.splice(this.collection.indexOf(this.data), 1)
                     this.$root.eventHub.$emit('explorer-item:sort', this.selectedOption.items)
                 })
                 .catch((error) => {
