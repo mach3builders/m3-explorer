@@ -41,9 +41,9 @@
                 <m3-popper v-if="!data.static" ref="move-popper" @popper:shown="movePopperShown" @popper:hidden="movePopperHidden">
                     <div class="m3-form-inline">
                         <div class="m3-form-field">
-                            <select ref="move-input">
-                                <option value="0" selected>{{ settings.text.moveItemSelectOption }}</option>
-                                <option :value="moveOption.id"
+                            <select ref="move-input" v-model="selectedOption">
+                                <option value="" disabled>{{ settings.text.moveItemSelectOption }}</option>
+                                <option :value="moveOption"
                                     v-for="moveOption in moveOptions"
                                     :key="moveOption.id"
                                     v-html="moveOption.option"
@@ -119,6 +119,7 @@ export default {
             optionName: null,
             removeConfirmClass: false,
             renaming: false,
+            selectedOption: '',
         }
     },
 
@@ -275,30 +276,23 @@ export default {
 
         move() {
             const ref = this.$refs['move-input']
-            const value = parseInt(ref.value)
 
-            if (this.settings.urls.moveItem && ref && value) {
+            if (this.settings.urls.moveItem && ref && this.selectedOption !== '') {
                 const formData = new FormData()
                 formData.append('group', this.groupId || 0)
-                formData.append('parent', value || 0)
+                formData.append('parent', this.selectedOption.id || 0)
                 formData.append('id', this.data.id)
 
                 // make request
                 axios.post(this.settings.urls.moveItem, formData)
                 .then((response) => {
+                    if (!this.selectedOption.items) {
+                        this.$set(this.selectedOption, 'items', [])
+                    }
 
-                    // if (!this.data.items) {
-                    //     this.$set(this.data, 'items', [])
-                    // }
-                    // this.data.items.push(response.data.data)
-
-                    // // open when closed
-                    // if (!this.itemsOpen) {
-                    //     this.$nextTick(() => {
-                    //         this.itemsOpen = true
-                    //     })
-                    // }
-                    // this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
+                    this.selectedOption.items.push(this.data)
+                    delete this.data
+                    this.$root.eventHub.$emit('explorer-item:sort', this.selectedOption.items)
                 })
                 .catch((error) => {
                     console.error(error)

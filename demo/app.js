@@ -3554,7 +3554,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       optionDisabled: false,
       optionName: null,
       removeConfirmClass: false,
-      renaming: false
+      renaming: false,
+      selectedOption: ''
     };
   },
   computed: {
@@ -3692,26 +3693,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     move: function move() {
-      var ref = this.$refs['move-input'];
-      var value = parseInt(ref.value);
+      var _this3 = this;
 
-      if (this.settings.urls.moveItem && ref && value) {
+      var ref = this.$refs['move-input'];
+
+      if (this.settings.urls.moveItem && ref && this.selectedOption !== '') {
         var formData = new FormData();
         formData.append('group', this.groupId || 0);
-        formData.append('parent', value || 0);
+        formData.append('parent', this.selectedOption.id || 0);
         formData.append('id', this.data.id); // make request
 
-        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.moveItem, formData).then(function (response) {// if (!this.data.items) {
-          //     this.$set(this.data, 'items', [])
-          // }
-          // this.data.items.push(response.data.data)
-          // // open when closed
-          // if (!this.itemsOpen) {
-          //     this.$nextTick(() => {
-          //         this.itemsOpen = true
-          //     })
-          // }
-          // this.$root.eventHub.$emit('explorer-item:sort', this.data.items)
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.moveItem, formData).then(function (response) {
+          if (!_this3.selectedOption.items) {
+            _this3.$set(_this3.selectedOption, 'items', []);
+          }
+
+          _this3.selectedOption.items.push(_this3.data);
+
+          delete _this3.data;
+
+          _this3.$root.eventHub.$emit('explorer-item:sort', _this3.selectedOption.items);
         }).catch(function (error) {
           console.error(error);
         });
@@ -3719,14 +3720,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     rename: function rename() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.renaming = true;
       this.$root.eventHub.$emit('explorer-item:rename', this);
       this.$root.eventHub.$emit('explorer-item:sort', this.data.items); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
-        var ref = _this3.$refs['input'];
+        var ref = _this4.$refs['input'];
 
         if (ref) {
           ref.focus();
@@ -3736,7 +3737,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.hideActionsPopper();
     },
     renamed: function renamed() {
-      var _this4 = this;
+      var _this5 = this;
 
       if (this.renaming && this.data.name.trim()) {
         if (this.settings.urls.renameItem) {
@@ -3747,10 +3748,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           formData.append('group_id', this.groupId || 0);
           formData.append('value', this.data.name.trim() || '');
           __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.renameItem, formData).then(function (response) {
-            _this4.loading = false;
-            _this4.renaming = false;
+            _this5.loading = false;
+            _this5.renaming = false;
 
-            _this4.$root.eventHub.$emit('explorer-items-group:sort-items', _this4.collection);
+            _this5.$root.eventHub.$emit('explorer-items-group:sort-items', _this5.collection);
           }).catch(function (error) {
             console.error(error);
           });
@@ -3767,7 +3768,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.removeConfirmClass = false;
     },
     remove: function remove() {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this.settings.urls.removeItem) {
         this.loading = true; // create form data, so we can catch $_POST with PHP for instance...
@@ -3776,9 +3777,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('id', this.data.id || 0);
         formData.append('group_id', this.groupId || 0);
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.removeItem, formData).then(function (response) {
-          _this5.collection.splice(_this5.collection.indexOf(_this5.data), 1);
+          _this6.collection.splice(_this6.collection.indexOf(_this6.data), 1);
 
-          _this5.loading = false;
+          _this6.loading = false;
         }).catch(function (error) {
           console.error(error);
         });
@@ -3798,7 +3799,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$refs['actions-popper'].hide();
     },
     showAddPopper: function showAddPopper() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.focus = true;
       var dispatcherRef = this.$refs['actions-button'];
@@ -3807,7 +3808,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       popperRef.show(); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
-        var inputRef = _this6.$refs['add-input'];
+        var inputRef = _this7.$refs['add-input'];
 
         if (inputRef) {
           inputRef.focus();
@@ -3824,7 +3825,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
     },
     showMovePopper: function showMovePopper() {
-      var _this7 = this;
+      var _this8 = this;
 
       // convert move options
       //this.convertMoveOptions(this.moveOptions)
@@ -3835,7 +3836,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       popperRef.show(); // focus on the input field, but first wait till the dom is updated
 
       this.$nextTick(function () {
-        var inputRef = _this7.$refs['move-input'];
+        var inputRef = _this8.$refs['move-input'];
 
         if (inputRef) {
           inputRef.focus();
@@ -4301,11 +4302,37 @@ var render = function() {
                           _c("div", { staticClass: "m3-form-field" }, [
                             _c(
                               "select",
-                              { ref: "move-input" },
+                              {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.selectedOption,
+                                    expression: "selectedOption"
+                                  }
+                                ],
+                                ref: "move-input",
+                                on: {
+                                  change: function($event) {
+                                    var $$selectedVal = Array.prototype.filter
+                                      .call($event.target.options, function(o) {
+                                        return o.selected
+                                      })
+                                      .map(function(o) {
+                                        var val =
+                                          "_value" in o ? o._value : o.value
+                                        return val
+                                      })
+                                    _vm.selectedOption = $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  }
+                                }
+                              },
                               [
                                 _c(
                                   "option",
-                                  { attrs: { value: "0", selected: "" } },
+                                  { attrs: { value: "", disabled: "" } },
                                   [
                                     _vm._v(
                                       _vm._s(
@@ -4322,7 +4349,7 @@ var render = function() {
                                       disabled: _vm.isOptionDisabled(moveOption)
                                     },
                                     domProps: {
-                                      value: moveOption.id,
+                                      value: moveOption,
                                       innerHTML: _vm._s(moveOption.option)
                                     }
                                   })
