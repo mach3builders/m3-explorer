@@ -43,11 +43,10 @@
                         <div class="m3-form-field">
                             <select ref="move-input" v-model="selectedOption">
                                 <option value="" disabled>{{ settings.text.moveItemSelectOption }}</option>
-                                <option :value="groupData">{{ settings.text.moveItemGroupOption }}</option>
                                 <option :value="moveOption"
                                     v-for="moveOption in moveOptions"
                                     :key="moveOption.id"
-                                    v-html="moveOption.option"
+                                    v-html="moveOption._data.option"
                                     :disabled="isOptionDisabled(moveOption)">
                                 </option>
                             </select>
@@ -66,7 +65,6 @@
                 :key="item.id"
                 :collection="staticItems"
                 :data="item"
-                :groupData="groupData"
                 :groupId="groupId"
                 :groupIsStatic="true"
                 :settings="settings" />
@@ -76,7 +74,6 @@
                 :collection="dynamicItems"
                 :moveOptions="moveOptions"
                 :data="item"
-                :groupData="groupData"
                 :groupId="groupId"
                 :groupIsStatic="groupIsStatic"
                 :parentData="data"
@@ -106,7 +103,6 @@ export default {
         data: Object,
         collection: Array,
         groupId: Number,
-        groupData: Array,
         groupIsStatic: Boolean,
         level: Number,
         moveOptions: Array,

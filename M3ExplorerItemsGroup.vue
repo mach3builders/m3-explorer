@@ -32,7 +32,6 @@
                     :collection="dynamicItems"
                     :moveOptions="moveOptions"
                     :data="item"
-                    :groupData="dynamicItems"
                     :groupId="data.id"
                     :groupIsStatic="data.static"
                     :settings="settings" />
@@ -93,7 +92,8 @@ export default {
                 }
 
                 items.forEach((item, index) => {
-                    this.$set(item, 'option', indent + item.name)
+                    this.$set(item, '_data', {})
+                    this.$set(item._data, 'option', indent + item.name)
                     final.push(item)
                     if (typeof item.items !== 'undefined') {
                         final = final.concat(this.flattenItems(item.items, level+1))

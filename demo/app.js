@@ -2988,7 +2988,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 
 
@@ -3035,7 +3034,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
 
         items.forEach(function (item, index) {
-          _this.$set(item, 'option', indent + item.name);
+          _this.$set(item, '_data', {});
+
+          _this.$set(item._data, 'option', indent + item.name);
 
           final.push(item);
 
@@ -3525,9 +3526,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 
 
@@ -3546,7 +3544,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: Object,
     collection: Array,
     groupId: Number,
-    groupData: Array,
     groupIsStatic: Boolean,
     level: Number,
     moveOptions: Array,
@@ -4350,18 +4347,6 @@ var render = function() {
                                   ]
                                 ),
                                 _vm._v(" "),
-                                _c(
-                                  "option",
-                                  { domProps: { value: _vm.groupData } },
-                                  [
-                                    _vm._v(
-                                      _vm._s(
-                                        _vm.settings.text.moveItemGroupOption
-                                      )
-                                    )
-                                  ]
-                                ),
-                                _vm._v(" "),
                                 _vm._l(_vm.moveOptions, function(moveOption) {
                                   return _c("option", {
                                     key: moveOption.id,
@@ -4370,7 +4355,7 @@ var render = function() {
                                     },
                                     domProps: {
                                       value: moveOption,
-                                      innerHTML: _vm._s(moveOption.option)
+                                      innerHTML: _vm._s(moveOption._data.option)
                                     }
                                   })
                                 })
@@ -4426,7 +4411,6 @@ var render = function() {
                   attrs: {
                     collection: _vm.staticItems,
                     data: item,
-                    groupData: _vm.groupData,
                     groupId: _vm.groupId,
                     groupIsStatic: true,
                     settings: _vm.settings
@@ -4441,7 +4425,6 @@ var render = function() {
                     collection: _vm.dynamicItems,
                     moveOptions: _vm.moveOptions,
                     data: item,
-                    groupData: _vm.groupData,
                     groupId: _vm.groupId,
                     groupIsStatic: _vm.groupIsStatic,
                     parentData: _vm.data,
@@ -4590,7 +4573,6 @@ var render = function() {
                       collection: _vm.dynamicItems,
                       moveOptions: _vm.moveOptions,
                       data: item,
-                      groupData: _vm.dynamicItems,
                       groupId: _vm.data.id,
                       groupIsStatic: _vm.data.static,
                       settings: _vm.settings
