@@ -262,6 +262,9 @@ export default {
                     if (!this.data.items) {
                         this.$set(this.data, 'items', [])
                     }
+                    if (!response.data.data.items) {
+                        this.$set(response.data.data, 'items', [])
+                    }
                     this.data.items.push(response.data.data)
 
                     // open when closed

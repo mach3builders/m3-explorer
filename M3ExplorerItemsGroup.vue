@@ -155,6 +155,10 @@ export default {
                 // make request
                 axios.post(this.settings.urls.addItem, formData)
                 .then((response) => {
+                    if (!response.data.data.items) {
+                        this.$set(response.data.data, 'items', [])
+                    }
+
                     if (this.data.items.dynamic) {
                         this.data.items.dynamic.push(response.data.data)
                         this.$root.eventHub.$emit('explorer-items-group:sort-items', this.data.items.dynamic)
