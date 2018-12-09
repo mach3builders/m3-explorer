@@ -31,10 +31,10 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "laravel-mix": "^3.0.0",
-    "vue": "^2.5.17"
+    "vue": "^2.5.18"
   },
   "dependencies": {
-    "@mach3builders/m3-components": "^1.0.20",
+    "@mach3builders/m3-components": "^1.0.22",
     "axios": "^0.18.0"
   }
 }

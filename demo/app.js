@@ -3095,6 +3095,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('value', ref.value.trim() || ''); // make request
 
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.addItem, formData).then(function (response) {
+          if (!response.data.data.items) {
+            _this3.$set(response.data.data, 'items', []);
+          }
+
           if (_this3.data.items.dynamic) {
             _this3.data.items.dynamic.push(response.data.data);
 
@@ -3145,6 +3149,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     type: String
   },
+  data: function data() {
+    return {
+      loading: false
+    };
+  },
   computed: {
     buttonClasses: function buttonClasses() {
       var classes = this.type ? " m3-".concat(this.type) : "";
@@ -3156,8 +3165,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   methods: {
     click: function click(event) {
-      // show loader and send clicked event
-      this.$emit('button:clicked', this, event);
+      if (!this.loading) {
+        // show loader and send clicked event
+        this.$emit('button:clicked', this, event);
+      }
     }
   }
 });
@@ -3190,11 +3201,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       validator: function validator(value) {
         return ['small', 'large'].indexOf(value) !== -1;
       }
-    }
+    },
+    loading: false
   },
   computed: {
     classes: function classes() {
       var classes = this.size ? " m3-".concat(this.size) : "";
+      classes += this.loading ? " m3-loading" : "";
       return classes.trim();
     },
     source: function source() {
@@ -3257,7 +3270,9 @@ var render = function() {
       on: { click: _vm.click }
     },
     [
-      _c("m3-icon", { attrs: { name: _vm.icon, size: _vm.size } }),
+      _c("m3-icon", {
+        attrs: { name: _vm.icon, size: _vm.size, loading: _vm.loading }
+      }),
       _vm._v(" "),
       _vm.$slots.default ? _c("div", [_vm._t("default")], 2) : _vm._e()
     ],
@@ -3685,6 +3700,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.addItem, formData).then(function (response) {
           if (!_this2.data.items) {
             _this2.$set(_this2.data, 'items', []);
+          }
+
+          if (!response.data.data.items) {
+            _this2.$set(response.data.data, 'items', []);
           }
 
           _this2.data.items.push(response.data.data); // open when closed
@@ -4595,7 +4614,8 @@ var render = function() {
                       settings: _vm.settings
                     }
                   })
-                })
+                }),
+                1
               )
             : _vm._e(),
           _vm._v(" "),
@@ -4617,7 +4637,8 @@ var render = function() {
                       settings: _vm.settings
                     }
                   })
-                })
+                }),
+                1
               )
             : _vm._e()
         ])
@@ -4653,7 +4674,8 @@ var render = function() {
           key: group.id,
           attrs: { data: group, settings: _vm.groupSettings }
         })
-      })
+      }),
+      1
     )
   ])
 }
