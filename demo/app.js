@@ -1592,7 +1592,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           addItemAction: 'Add folder',
           moveItemAction: 'Move to',
           moveItemSelectOption: 'Select a folder',
-          moveItemGroupOption: 'Group folder',
           renameItemAction: 'Rename',
           removeItemAction: 'Delete'
         },
@@ -1736,7 +1735,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         renameItemAction: 'Rename',
         moveItemAction: 'Move',
         moveItemSelectOption: 'Select an item',
-        moveItemGroupOption: 'Group item',
         removeItemAction: 'Remove'
       }, this.settings.text);
       Object.assign(urls, {
@@ -2988,6 +2986,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 
 
@@ -3024,7 +3025,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var _this = this;
 
       var final = [];
-      level = level || 0;
+      level = level || 1;
 
       if (items && items.length && !items.static) {
         var indent = '';
@@ -3526,6 +3527,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 
 
@@ -3544,10 +3549,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: Object,
     collection: Array,
     groupId: Number,
+    groupName: String,
     groupIsStatic: Boolean,
     level: Number,
     moveOptions: Array,
     parentData: Object,
+    rootCollection: Array,
     settings: Object
   },
   data: function data() {
@@ -3708,16 +3715,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         formData.append('id', this.data.id); // make request
 
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(this.settings.urls.moveItem, formData).then(function (response) {
-          if (!_this3.selectedOption.items) {
-            _this3.$set(_this3.selectedOption, 'items', []);
-          } // move, delete, sort
+          // move to root
+          if (_this3.selectedOption === 'root') {
+            _this3.rootCollection.push(_this3.data);
+
+            _this3.collection.splice(_this3.collection.indexOf(_this3.data), 1);
+
+            _this3.$root.eventHub.$emit('explorer-item:sort', _this3.rootCollection);
+          } // move elsewhere in the tree
+          else {
+              if (!_this3.selectedOption.items) {
+                _this3.$set(_this3.selectedOption, 'items', []);
+              } // move, delete, sort
 
 
-          _this3.selectedOption.items.push(_this3.data);
+              _this3.selectedOption.items.push(_this3.data);
 
-          _this3.collection.splice(_this3.collection.indexOf(_this3.data), 1);
+              _this3.collection.splice(_this3.collection.indexOf(_this3.data), 1);
 
-          _this3.$root.eventHub.$emit('explorer-item:sort', _this3.selectedOption.items);
+              _this3.$root.eventHub.$emit('explorer-item:sort', _this3.selectedOption.items);
+            }
         }).catch(function (error) {
           console.error(error);
         });
@@ -3875,6 +3892,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       return option === this.data;
     },
     isOptionParentItem: function isOptionParentItem(option) {
+      // exception for root
+      if (option === 'root' && !this.parentData) {
+        return true;
+      }
+
       return option === this.parentData;
     },
     isOptionChildItem: function isOptionChildItem(option, items) {
@@ -4347,6 +4369,17 @@ var render = function() {
                                   ]
                                 ),
                                 _vm._v(" "),
+                                _c(
+                                  "option",
+                                  {
+                                    attrs: {
+                                      value: "root",
+                                      disabled: _vm.isOptionDisabled("root")
+                                    }
+                                  },
+                                  [_vm._v(_vm._s(_vm.groupName))]
+                                ),
+                                _vm._v(" "),
                                 _vm._l(_vm.moveOptions, function(moveOption) {
                                   return _c("option", {
                                     key: moveOption.id,
@@ -4412,6 +4445,7 @@ var render = function() {
                     collection: _vm.staticItems,
                     data: item,
                     groupId: _vm.groupId,
+                    groupName: _vm.groupName,
                     groupIsStatic: true,
                     settings: _vm.settings
                   }
@@ -4426,8 +4460,10 @@ var render = function() {
                     moveOptions: _vm.moveOptions,
                     data: item,
                     groupId: _vm.groupId,
+                    groupName: _vm.groupName,
                     groupIsStatic: _vm.groupIsStatic,
                     parentData: _vm.data,
+                    rootCollection: _vm.rootCollection,
                     settings: _vm.settings
                   }
                 })
@@ -4554,6 +4590,7 @@ var render = function() {
                       collection: _vm.staticItems,
                       data: item,
                       groupId: _vm.data.id,
+                      groupName: _vm.data.name,
                       groupIsStatic: true,
                       settings: _vm.settings
                     }
@@ -4574,7 +4611,9 @@ var render = function() {
                       moveOptions: _vm.moveOptions,
                       data: item,
                       groupId: _vm.data.id,
+                      groupName: _vm.data.name,
                       groupIsStatic: _vm.data.static,
+                      rootCollection: _vm.dynamicItems,
                       settings: _vm.settings
                     }
                   })

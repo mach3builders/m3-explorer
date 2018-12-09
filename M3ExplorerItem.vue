@@ -43,6 +43,7 @@
                         <div class="m3-form-field">
                             <select ref="move-input" v-model="selectedOption">
                                 <option value="" disabled>{{ settings.text.moveItemSelectOption }}</option>
+                                <option value="root" :disabled="isOptionDisabled('root')">{{ groupName }}</option>
                                 <option :value="moveOption"
                                     v-for="moveOption in moveOptions"
                                     :key="moveOption.id"
@@ -66,6 +67,7 @@
                 :collection="staticItems"
                 :data="item"
                 :groupId="groupId"
+                :groupName="groupName"
                 :groupIsStatic="true"
                 :settings="settings" />
 
@@ -75,8 +77,10 @@
                 :moveOptions="moveOptions"
                 :data="item"
                 :groupId="groupId"
+                :groupName="groupName"
                 :groupIsStatic="groupIsStatic"
                 :parentData="data"
+                :rootCollection="rootCollection"
                 :settings="settings" />
         </m3-collapse>
     </div>
@@ -103,10 +107,12 @@ export default {
         data: Object,
         collection: Array,
         groupId: Number,
+        groupName: String,
         groupIsStatic: Boolean,
         level: Number,
         moveOptions: Array,
         parentData: Object,
+        rootCollection: Array,
         settings: Object,
     },
 
@@ -286,14 +292,23 @@ export default {
                 // make request
                 axios.post(this.settings.urls.moveItem, formData)
                 .then((response) => {
-                    if (!this.selectedOption.items) {
-                        this.$set(this.selectedOption, 'items', [])
+                    // move to root
+                    if (this.selectedOption === 'root') {
+                        this.rootCollection.push(this.data)
+                        this.collection.splice(this.collection.indexOf(this.data), 1)
+                        this.$root.eventHub.$emit('explorer-item:sort', this.rootCollection)
                     }
+                    // move elsewhere in the tree
+                    else {
+                        if (!this.selectedOption.items) {
+                            this.$set(this.selectedOption, 'items', [])
+                        }
 
-                    // move, delete, sort
-                    this.selectedOption.items.push(this.data)
-                    this.collection.splice(this.collection.indexOf(this.data), 1)
-                    this.$root.eventHub.$emit('explorer-item:sort', this.selectedOption.items)
+                        // move, delete, sort
+                        this.selectedOption.items.push(this.data)
+                        this.collection.splice(this.collection.indexOf(this.data), 1)
+                        this.$root.eventHub.$emit('explorer-item:sort', this.selectedOption.items)
+                    }
                 })
                 .catch((error) => {
                     console.error(error)
@@ -468,6 +483,11 @@ export default {
         },
 
         isOptionParentItem(option) {
+            // exception for root
+            if (option === 'root' && !this.parentData) {
+                return true
+            }
+
             return option === this.parentData
         },
 

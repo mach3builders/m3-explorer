@@ -22,6 +22,7 @@
                     :collection="staticItems"
                     :data="item"
                     :groupId="data.id"
+                    :groupName="data.name"
                     :groupIsStatic="true"
                     :settings="settings" />
             </div>
@@ -33,7 +34,9 @@
                     :moveOptions="moveOptions"
                     :data="item"
                     :groupId="data.id"
+                    :groupName="data.name"
                     :groupIsStatic="data.static"
+                    :rootCollection="dynamicItems"
                     :settings="settings" />
             </div>
         </div>
@@ -82,7 +85,7 @@ export default {
     methods: {
         flattenItems(items, level) {
             let final = []
-            level = level || 0
+            level = level || 1
 
             if (items && items.length && !items.static) {
                 let indent = ''

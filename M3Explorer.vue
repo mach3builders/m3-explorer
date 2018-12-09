@@ -78,7 +78,6 @@ export default {
                 renameItemAction: 'Rename',
                 moveItemAction: 'Move',
                 moveItemSelectOption: 'Select an item',
-                moveItemGroupOption: 'Group item',
                 removeItemAction: 'Remove',
             }, this.settings.text)
 
