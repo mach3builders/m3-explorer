@@ -1,8 +1,14 @@
 {
   "name": "@mach3builders/m3-explorer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A finder/explorer for every project.",
-  "main": "index.js",
+  "main": "./M3Explorer.vue",
+  "files": [
+    "components.js",
+    "package.json",
+    "/*.vue",
+    "/*.scss"
+  ],
   "scripts": {
     "dev": "npm run development",
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
