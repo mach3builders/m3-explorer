@@ -93,7 +93,7 @@ export default {
         },
 
         sortItems(data) {
-            if (data.length) {
+            if (data && data.length) {
                 data.sort(function(a, b) {
                     const nameA = a.name.toUpperCase()
                     const nameB = b.name.toUpperCase()
