@@ -1,6 +1,6 @@
 {
   "name": "@mach3builders/m3-explorer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A finder/explorer for every project.",
   "main": "./M3Explorer.vue",
   "files": [
@@ -34,7 +34,7 @@
     "vue": "^2.5.18"
   },
   "dependencies": {
-    "@mach3builders/m3-components": "^1.0.22",
+    "@mach3builders/m3-components": "^1.0.23",
     "axios": "^0.18.0"
   }
 }
