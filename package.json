@@ -29,12 +29,12 @@
   },
   "homepage": "https://github.com/mach3builders/m3-explorer#readme",
   "devDependencies": {
+    "@mach3builders/m3-components": "^1.0.25",
     "cross-env": "^5.2.0",
     "laravel-mix": "^3.0.0",
     "vue": "^2.5.18"
   },
   "dependencies": {
-    "@mach3builders/m3-components": "^1.0.23",
     "axios": "^0.18.0"
   }
 }
