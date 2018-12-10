@@ -167,6 +167,11 @@
   width: 2.25rem;
 }
 
+.m3-button:not(.m3-button-icon) > .m3-icon {
+  -webkit-transform: translateX(-0.5rem);
+          transform: translateX(-0.5rem);
+}
+
 .m3-collapse {
   overflow: hidden;
 }
