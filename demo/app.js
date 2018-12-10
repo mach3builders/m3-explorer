@@ -1747,7 +1747,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       };
     },
     sortItems: function sortItems(data) {
-      if (data.length) {
+      if (data && data.length) {
         data.sort(function (a, b) {
           var nameA = a.name.toUpperCase();
           var nameB = b.name.toUpperCase();
@@ -4526,7 +4526,7 @@ var render = function() {
           ? _c("m3-button", {
               attrs: {
                 type: "transparent",
-                icon: "folder-plus",
+                icon: "folder-plus-dark",
                 size: "large",
                 flat: ""
               },
