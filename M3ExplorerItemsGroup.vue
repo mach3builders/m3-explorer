@@ -2,7 +2,7 @@
     <div class="m3-explorer-items-group">
         <div class="m3-explorer-items-group-name-wrapper">
             <div class="m3-explorer-items-group-name">{{ data.name }}</div>
-            <m3-button type="transparent" icon="folder-plus" size="large" @button:clicked="showPopper" v-if="!data.static" flat></m3-button>
+            <m3-button type="transparent" icon="folder-plus-dark" size="large" @button:clicked="showPopper" v-if="!data.static" flat></m3-button>
 
             <m3-popper v-if="!data.static" ref="add-popper">
                 <div class="m3-form-inline">
