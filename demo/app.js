@@ -1671,9 +1671,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -3053,14 +3050,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (this.staticItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.staticItems);
       if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.dynamicItems);
     },
-    showPopper: function showPopper(vm, event) {
+    showPopper: function showPopper(data) {
       var _this2 = this;
 
-      event.stopPropagation();
+      data.event.stopPropagation();
       var popperRef = this.$refs['add-popper'];
 
       if (popperRef) {
-        popperRef.setDispatcher(vm);
+        popperRef.setDispatcher(data.dispatcher);
         popperRef.show(); // focus on the input field, but first wait till the dom is updated
 
         this.$nextTick(function () {
@@ -3124,8 +3121,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__M3Icon__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__M3Icon___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__M3Icon__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__M3Icon__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__M3Icon___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__M3Icon__);
 //
 //
 //
@@ -3134,11 +3133,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
-    M3Icon: __WEBPACK_IMPORTED_MODULE_0__M3Icon___default.a
+    M3Icon: __WEBPACK_IMPORTED_MODULE_1__M3Icon___default.a
   },
   props: {
+    color: String,
     flat: Boolean,
     icon: String,
     size: {
@@ -3147,7 +3148,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return ['small', 'large'].indexOf(value) !== -1;
       }
     },
-    type: String
+    type: String,
+    url: String
   },
   data: function data() {
     return {
@@ -3155,8 +3157,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     };
   },
   computed: {
-    buttonClasses: function buttonClasses() {
-      var classes = this.type ? " m3-".concat(this.type) : "";
+    classes: function classes() {
+      var classes = this.color ? " m3-".concat(this.color) : "";
+      classes += this.type ? " m3-".concat(this.type) : "";
       classes += this.size ? " m3-".concat(this.size) : "";
       classes += this.flat ? ' m3-flat' : '';
       classes += this.icon && !this.$slots.default ? ' m3-button-icon' : '';
@@ -3165,10 +3168,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   methods: {
     click: function click(event) {
-      if (!this.loading) {
-        // show loader and send clicked event
-        this.$emit('button:clicked', this, event);
+      this.$emit('click', {
+        event: event,
+        dispatcher: this
+      }); // load url via ajax
+
+      if (!this.loading && this.url) {
+        this.loadUrl(event);
       }
+    },
+    loadUrl: function loadUrl(event) {
+      var _this = this;
+
+      this.loading = true;
+      __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(this.url).then(function (response) {
+        _this.loading = false; // emit event that the button url has been loaded
+
+        _this.$emit('url-loaded', {
+          event: event,
+          data: response.data,
+          dispatcher: _this
+        });
+      }).catch(function (error) {
+        _this.active = false;
+        _this.loading = false; // emit event that the button url has been loaded with an error
+
+        _this.$emit('url-not-loaded', {
+          event: event,
+          data: error,
+          dispatcher: _this
+        });
+      });
     }
   }
 });
@@ -3187,22 +3217,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    path: {
-      type: String,
-      default: '/assets/img/'
-    },
     extension: {
       type: String,
       default: 'svg'
     },
+    loading: false,
     name: String,
+    path: {
+      type: String,
+      default: '/assets/img/'
+    },
     size: {
       type: String,
       validator: function validator(value) {
         return ['small', 'large'].indexOf(value) !== -1;
       }
-    },
-    loading: false
+    }
   },
   computed: {
     classes: function classes() {
@@ -3217,8 +3247,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     }
   },
   methods: {
-    click: function click() {
-      this.$emit('icon:clicked', this);
+    click: function click(event) {
+      this.$emit('click', {
+        event: event,
+        dispatcher: this
+      });
     }
   }
 });
@@ -3265,7 +3298,7 @@ var render = function() {
     "button",
     {
       staticClass: "m3-button",
-      class: _vm.buttonClasses,
+      class: _vm.classes,
       attrs: { type: "button" },
       on: { click: _vm.click }
     },
@@ -3360,7 +3393,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         this.active = true; // emit event, so the parent can act on it
 
-        this.$emit('popper:shown', this);
+        this.$emit('shown', {
+          dispatcher: this
+        });
       }
     },
     hide: function hide(vm) {
@@ -3375,7 +3410,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           _this.$el.removeAttribute('style');
         }, 0); // emit event, so the parent can act on it
 
-        this.$emit('popper:hidden', this);
+        this.$emit('hidden', {
+          dispatcher: this
+        });
       }
     },
     position: function position(el) {
@@ -3593,13 +3630,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     expandIcon: function expandIcon() {
       if (this.hasItems()) {
-        return this.itemsOpen ? 'angle-down' : 'angle-right';
+        return this.itemsOpen ? 'angle-down-dark' : 'angle-right-dark';
       }
 
       return null;
     },
     icon: function icon() {
-      return this.data.icon || 'folder';
+      return this.data.icon || 'folder-dark';
     },
     actionsAllowed: function actionsAllowed() {
       return !this.groupIsStatic && !this.data.static && !this.renaming;
@@ -3804,8 +3841,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     removeConfirm: function removeConfirm() {
       this.removeConfirmClass = true;
     },
-    removeCancelled: function removeCancelled(vm, event) {
-      event.stopPropagation();
+    removeCancelled: function removeCancelled(data) {
+      data.event.stopPropagation();
       this.removeConfirmClass = false;
     },
     remove: function remove() {
@@ -3828,11 +3865,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       this.hideActionsPopper();
     },
-    showActionsPopper: function showActionsPopper(vm, event) {
-      event.stopPropagation();
-      this.removeCancelled(vm, event);
+    showActionsPopper: function showActionsPopper(data) {
+      data.event.stopPropagation();
+      this.removeCancelled(data);
       var ref = this.$refs['actions-popper'];
-      ref.setDispatcher(vm);
+      ref.setDispatcher(data.dispatcher);
       ref.show();
       this.$root.eventHub.$emit('explorer-item:hide-renaming-popper');
     },
@@ -4101,7 +4138,7 @@ var render = function() {
           _vm.hasItems()
             ? _c("m3-icon", {
                 attrs: { name: _vm.expandIcon },
-                on: { "icon:clicked": _vm.toggleItems }
+                on: { click: _vm.toggleItems }
               })
             : _vm._e(),
           _vm._v(" "),
@@ -4178,10 +4215,10 @@ var render = function() {
                     ref: "actions-button",
                     attrs: {
                       type: "transparent",
-                      icon: "ellipsis-h",
+                      icon: "ellipsis-h-dark",
                       flat: ""
                     },
-                    on: { "button:clicked": _vm.showActionsPopper }
+                    on: { click: _vm.showActionsPopper }
                   })
                 : _vm._e(),
               _vm._v(" "),
@@ -4191,8 +4228,8 @@ var render = function() {
                     {
                       ref: "actions-popper",
                       on: {
-                        "popper:shown": _vm.actionsPopperShown,
-                        "popper:hidden": _vm.actionsPopperHidden
+                        shown: _vm.actionsPopperShown,
+                        hidden: _vm.actionsPopperHidden
                       }
                     },
                     [
@@ -4233,21 +4270,19 @@ var render = function() {
                                   _c("m3-button", {
                                     attrs: {
                                       type: "danger",
-                                      icon: "times",
+                                      icon: "times-light",
                                       flat: ""
                                     },
-                                    on: {
-                                      "button:clicked": _vm.removeCancelled
-                                    }
+                                    on: { click: _vm.removeCancelled }
                                   }),
                                   _vm._v(" "),
                                   _c("m3-button", {
                                     attrs: {
                                       type: "success",
-                                      icon: "check",
+                                      icon: "check-light",
                                       flat: ""
                                     },
-                                    on: { "button:clicked": _vm.remove }
+                                    on: { click: _vm.remove }
                                   })
                                 ],
                                 1
@@ -4267,8 +4302,8 @@ var render = function() {
                     {
                       ref: "add-popper",
                       on: {
-                        "popper:shown": _vm.addPopperShown,
-                        "popper:hidden": _vm.addPopperHidden
+                        shown: _vm.addPopperShown,
+                        hidden: _vm.addPopperHidden
                       }
                     },
                     [
@@ -4306,19 +4341,19 @@ var render = function() {
                               _c("m3-button", {
                                 attrs: {
                                   type: "success",
-                                  icon: "check",
+                                  icon: "check-light",
                                   flat: ""
                                 },
-                                on: { "button:clicked": _vm.add }
+                                on: { click: _vm.add }
                               }),
                               _vm._v(" "),
                               _c("m3-button", {
                                 attrs: {
                                   type: "danger",
-                                  icon: "times",
+                                  icon: "times-light",
                                   flat: ""
                                 },
-                                on: { "button:clicked": _vm.hideAddPopper }
+                                on: { click: _vm.hideAddPopper }
                               })
                             ],
                             1
@@ -4336,8 +4371,8 @@ var render = function() {
                     {
                       ref: "move-popper",
                       on: {
-                        "popper:shown": _vm.movePopperShown,
-                        "popper:hidden": _vm.movePopperHidden
+                        shown: _vm.movePopperShown,
+                        hidden: _vm.movePopperHidden
                       }
                     },
                     [
@@ -4422,19 +4457,19 @@ var render = function() {
                               _c("m3-button", {
                                 attrs: {
                                   type: "success",
-                                  icon: "check",
+                                  icon: "check-light",
                                   flat: ""
                                 },
-                                on: { "button:clicked": _vm.move }
+                                on: { click: _vm.move }
                               }),
                               _vm._v(" "),
                               _c("m3-button", {
                                 attrs: {
                                   type: "danger",
-                                  icon: "times",
+                                  icon: "times-light",
                                   flat: ""
                                 },
-                                on: { "button:clicked": _vm.hideMovePopper }
+                                on: { click: _vm.hideMovePopper }
                               })
                             ],
                             1
@@ -4530,7 +4565,7 @@ var render = function() {
                 size: "large",
                 flat: ""
               },
-              on: { "button:clicked": _vm.showPopper }
+              on: { click: _vm.showPopper }
             })
           : _vm._e(),
         _vm._v(" "),
@@ -4568,21 +4603,21 @@ var render = function() {
                     "m3-buttons",
                     [
                       _c("m3-button", {
-                        attrs: { type: "success", icon: "check", flat: "" },
-                        nativeOn: {
-                          click: function($event) {
-                            return _vm.addItem($event)
-                          }
-                        }
+                        attrs: {
+                          type: "success",
+                          icon: "check-light",
+                          flat: ""
+                        },
+                        on: { click: _vm.addItem }
                       }),
                       _vm._v(" "),
                       _c("m3-button", {
-                        attrs: { type: "danger", icon: "times", flat: "" },
-                        nativeOn: {
-                          click: function($event) {
-                            return _vm.hidePopper($event)
-                          }
-                        }
+                        attrs: {
+                          type: "danger",
+                          icon: "times-light",
+                          flat: ""
+                        },
+                        on: { click: _vm.hidePopper }
                       })
                     ],
                     1
@@ -4663,21 +4698,17 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "m3-explorer" }, [
-    _c("div", { staticClass: "m3-explorer-header" }),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "m3-explorer-body" },
-      _vm._l(_vm.data, function(group) {
-        return _c("m3-explorer-items-group", {
-          key: group.id,
-          attrs: { data: group, settings: _vm.groupSettings }
-        })
-      }),
-      1
-    )
-  ])
+  return _c(
+    "div",
+    { staticClass: "m3-explorer" },
+    _vm._l(_vm.data, function(group) {
+      return _c("m3-explorer-items-group", {
+        key: group.id,
+        attrs: { data: group, settings: _vm.groupSettings }
+      })
+    }),
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true

@@ -2,14 +2,14 @@
     <div class="m3-explorer-items-group">
         <div class="m3-explorer-items-group-name-wrapper">
             <div class="m3-explorer-items-group-name">{{ data.name }}</div>
-            <m3-button type="transparent" icon="folder-plus-dark" size="large" @button:clicked="showPopper" v-if="!data.static" flat></m3-button>
+            <m3-button type="transparent" icon="folder-plus-dark" size="large" @click="showPopper" v-if="!data.static" flat></m3-button>
 
             <m3-popper v-if="!data.static" ref="add-popper">
                 <div class="m3-form-inline">
                     <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="addItem" /></div>
                     <m3-buttons>
-                        <m3-button type="success" icon="check" @click.native="addItem" flat></m3-button>
-                        <m3-button type="danger" icon="times" @click.native="hidePopper" flat></m3-button>
+                        <m3-button type="success" icon="check-light" @click="addItem" flat></m3-button>
+                        <m3-button type="danger" icon="times-light" @click="hidePopper" flat></m3-button>
                     </m3-buttons>
                 </div>
             </m3-popper>
@@ -112,12 +112,12 @@ export default {
             if (this.dynamicItems.length) this.$root.eventHub.$emit('explorer-items-group:sort-items', this.dynamicItems)
         },
 
-        showPopper(vm, event) {
-            event.stopPropagation()
+        showPopper(data) {
+            data.event.stopPropagation()
             const popperRef = this.$refs['add-popper']
 
             if (popperRef) {
-                popperRef.setDispatcher(vm)
+                popperRef.setDispatcher(data.dispatcher)
                 popperRef.show()
 
                 // focus on the input field, but first wait till the dom is updated

@@ -1,7 +1,7 @@
 <template>
     <div class="m3-explorer-item-wrapper">
         <div class="m3-explorer-item">
-            <m3-icon :name="expandIcon" v-if="hasItems()" @icon:clicked="toggleItems"></m3-icon>
+            <m3-icon :name="expandIcon" v-if="hasItems()" @click="toggleItems"></m3-icon>
             <div class="m3-explorer-item-name-wrapper" :class="itemClasses" @click="click">
                 <m3-icon :name="icon" size="large"></m3-icon>
                 <div class="m3-explorer-item-name" v-if="!renaming">{{ data.name }}</div>
@@ -9,9 +9,9 @@
                     <input maxlength="50" v-model="data.name" @keyup.enter="renamed" ref="input">
                 </div>
 
-                <m3-button type="transparent" icon="ellipsis-h" ref="actions-button" v-if="actionsAllowed" @button:clicked="showActionsPopper" flat></m3-button>
+                <m3-button type="transparent" icon="ellipsis-h-dark" ref="actions-button" v-if="actionsAllowed" @click="showActionsPopper" flat></m3-button>
 
-                <m3-popper v-if="actionsAllowed" ref="actions-popper" @popper:shown="actionsPopperShown" @popper:hidden="actionsPopperHidden">
+                <m3-popper v-if="actionsAllowed" ref="actions-popper" @shown="actionsPopperShown" @hidden="actionsPopperHidden">
                     <ul>
                         <li @click="showAddPopper"><div>{{ settings.text.addItemAction }}</div></li>
                         <li @click="showMovePopper"><div>{{ settings.text.moveItemAction }}</div></li>
@@ -20,25 +20,25 @@
                             <div>{{ settings.text.removeItemAction }}</div>
                             <div class="m3-explorer-item-remove-confirm" :class="{ 'm3-show': removeConfirmClass }">
                                 <m3-buttons>
-                                    <m3-button type="danger" icon="times" @button:clicked="removeCancelled" flat></m3-button>
-                                    <m3-button type="success" icon="check" @button:clicked="remove" flat></m3-button>
+                                    <m3-button type="danger" icon="times-light" @click="removeCancelled" flat></m3-button>
+                                    <m3-button type="success" icon="check-light" @click="remove" flat></m3-button>
                                 </m3-buttons>
                             </div>
                         </li>
                     </ul>
                 </m3-popper>
 
-                <m3-popper v-if="!data.static" ref="add-popper" @popper:shown="addPopperShown" @popper:hidden="addPopperHidden">
+                <m3-popper v-if="!data.static" ref="add-popper" @shown="addPopperShown" @hidden="addPopperHidden">
                     <div class="m3-form-inline">
                         <div class="m3-form-field"><input maxlength="50" ref="add-input" @keyup.enter="add" /></div>
                         <m3-buttons>
-                            <m3-button type="success" icon="check" @button:clicked="add" flat></m3-button>
-                            <m3-button type="danger" icon="times" @button:clicked="hideAddPopper" flat></m3-button>
+                            <m3-button type="success" icon="check-light" @click="add" flat></m3-button>
+                            <m3-button type="danger" icon="times-light" @click="hideAddPopper" flat></m3-button>
                         </m3-buttons>
                     </div>
                 </m3-popper>
 
-                <m3-popper v-if="!data.static" ref="move-popper" @popper:shown="movePopperShown" @popper:hidden="movePopperHidden">
+                <m3-popper v-if="!data.static" ref="move-popper" @shown="movePopperShown" @hidden="movePopperHidden">
                     <div class="m3-form-inline">
                         <div class="m3-form-field">
                             <select ref="move-input" v-model="selectedOption">
@@ -53,8 +53,8 @@
                             </select>
                         </div>
                         <m3-buttons>
-                            <m3-button type="success" icon="check" @button:clicked="move" flat></m3-button>
-                            <m3-button type="danger" icon="times" @button:clicked="hideMovePopper" flat></m3-button>
+                            <m3-button type="success" icon="check-light" @click="move" flat></m3-button>
+                            <m3-button type="danger" icon="times-light" @click="hideMovePopper" flat></m3-button>
                         </m3-buttons>
                     </div>
                 </m3-popper>
@@ -139,13 +139,13 @@ export default {
 
         expandIcon() {
             if (this.hasItems()) {
-                return this.itemsOpen ? 'angle-down' : 'angle-right'
+                return this.itemsOpen ? 'angle-down-dark' : 'angle-right-dark'
             }
             return null
         },
 
         icon() {
-            return this.data.icon || 'folder'
+            return this.data.icon || 'folder-dark'
         },
 
         actionsAllowed() {
@@ -369,8 +369,8 @@ export default {
             this.removeConfirmClass = true
         },
 
-        removeCancelled(vm, event) {
-            event.stopPropagation()
+        removeCancelled(data) {
+            data.event.stopPropagation()
             this.removeConfirmClass = false
         },
 
@@ -396,12 +396,12 @@ export default {
             this.hideActionsPopper()
         },
 
-        showActionsPopper(vm, event) {
-            event.stopPropagation()
-            this.removeCancelled(vm, event)
+        showActionsPopper(data) {
+            data.event.stopPropagation()
+            this.removeCancelled(data)
 
             const ref = this.$refs['actions-popper']
-            ref.setDispatcher(vm)
+            ref.setDispatcher(data.dispatcher)
             ref.show()
 
             this.$root.eventHub.$emit('explorer-item:hide-renaming-popper')
