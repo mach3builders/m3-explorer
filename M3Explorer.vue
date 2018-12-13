@@ -1,9 +1,6 @@
 <template>
     <div class="m3-explorer">
-        <div class="m3-explorer-header"></div>
-        <div class="m3-explorer-body">
-            <m3-explorer-items-group v-for="group in data" :key="group.id" :data="group" :settings="groupSettings" />
-        </div>
+        <m3-explorer-items-group v-for="group in data" :key="group.id" :data="group" :settings="groupSettings" />
     </div>
 </template>
 

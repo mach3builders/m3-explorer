@@ -1,8 +1,8 @@
 [
     { "id": 1, "name": "My Uploads", "items": {
         "static" : [
-            { "id": 1, "icon": "home", "name": "Home", "active": true},
-            { "id": 2, "icon": "recycle", "name": "Used" }
+            { "id": 1, "icon": "home-dark", "name": "Home", "active": true},
+            { "id": 2, "icon": "recycle-dark", "name": "Used" }
         ], "dynamic": [
             { "id": 1, "name": "Wedding", "items": [
                 { "id": 10, "name": "Iconmonstr" },
